@@ -1,8 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
-public class Network_Player : MonoBehaviour
+public class ButtonController : MonoBehaviour
 {
     // Start is called before the first frame update
     void Start()
@@ -14,5 +15,10 @@ public class Network_Player : MonoBehaviour
     void Update()
     {
         
+    }
+
+    public void LoadScene(string s) //Funcion para cambiar de escena
+    {
+        SceneManager.LoadScene(s);  
     }
 }

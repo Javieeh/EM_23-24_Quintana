@@ -11,6 +11,10 @@ public class GameManager : MonoBehaviour
 
     public List<Player> players = new List<Player>();
 
+
+    //Nombre de cada jugador
+    public string playerName;
+
     void Awake()
     {
         if (Instance == null)

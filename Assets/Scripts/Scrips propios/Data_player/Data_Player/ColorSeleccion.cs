@@ -65,6 +65,12 @@ public class ColorSeleccion : MonoBehaviour
         GameManager.Instance.AddPlayer(nuevoJugador);
 
         // Cambiar a la siguiente escena
-        SceneManager.LoadScene("NombreDeLaSiguienteEscena");
+        SceneManager.LoadScene("Emparejamiento");
+    }
+
+    public void ConfirmName() //FuncionAuxiliar para cambiar color
+    {
+        string _playerName = inputNombreJugador.text;
+        GameManager.Instance.playerName = _playerName;
     }
 }
