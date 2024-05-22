@@ -20,6 +20,6 @@ public class Player : MonoBehaviour
 
     private void Start()
     {
-        //GameManager.Instance.currentRace.AddPlayer(this);
+        GameManager.Instance.currentRace.AddPlayer(this);
     }
 }
