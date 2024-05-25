@@ -11,13 +11,13 @@ public class LobbyManager : MonoBehaviour
     public GameObject CanvasSeleccion;
     public GameObject CanvasEmparejamiento;
 
-    public Material materialCoche; // Referencia al material del coche que cambiará de color
-    public Color[] coloresDisponibles; // Lista de colores disponibles para la selección
-    private int indiceColorActual = 0; // Índice del color actualmente seleccionado
+    public Material materialCoche; // Referencia al material del coche que cambiarï¿½ de color
+    public Color[] coloresDisponibles; // Lista de colores disponibles para la selecciï¿½n
+    private int indiceColorActual = 0; // ï¿½ndice del color actualmente seleccionado
 
-    public Button botonAvanzar; // Referencia al botón de avanzar
-    public Button botonRetroceder; // Referencia al botón de retroceder
-    public Button botonConfirmar; // Referencia al botón de confirmar selección
+    public Button botonAvanzar; // Referencia al botï¿½n de avanzar
+    public Button botonRetroceder; // Referencia al botï¿½n de retroceder
+    public Button botonConfirmar; // Referencia al botï¿½n de confirmar selecciï¿½n
 
     public InputField inputNombreJugador; // Referencia al campo de entrada para el nombre del jugador
     public Text playersListText;
@@ -25,7 +25,7 @@ public class LobbyManager : MonoBehaviour
     private Network_Connection_Manager networkConnectionManager;
     private List<string> playerNames = new List<string>(); //lista de jugadores
 
-    // Método para inicializar el color del coche
+    // Mï¿½todo para inicializar el color del coche
     void Start()
     {
         CanvasSeleccion.SetActive(true);
@@ -40,7 +40,7 @@ public class LobbyManager : MonoBehaviour
 
 
         networkConnectionManager = FindObjectOfType<Network_Connection_Manager>();
-
+        
 
         if (networkConnectionManager == null)
         {
@@ -52,7 +52,7 @@ public class LobbyManager : MonoBehaviour
     
     }
 
-    // Método para cambiar el color del coche
+    // Mï¿½todo para cambiar el color del coche
     void CambiarColor()
     {
         if (coloresDisponibles.Length > 0)
@@ -61,14 +61,14 @@ public class LobbyManager : MonoBehaviour
         }
     }
 
-    // Método para avanzar en la selección de colores
+    // Mï¿½todo para avanzar en la selecciï¿½n de colores
     public void AvanzarColor()
     {
         indiceColorActual = (indiceColorActual + 1) % coloresDisponibles.Length;
         CambiarColor();
     }
 
-    // Método para retroceder en la selección de colores
+    // Mï¿½todo para retroceder en la selecciï¿½n de colores
     public void RetrocederColor()
     {
         indiceColorActual = (indiceColorActual - 1 + coloresDisponibles.Length) % coloresDisponibles.Length;
@@ -106,7 +106,7 @@ public class LobbyManager : MonoBehaviour
 
 
 
-        // Añadir el nuevo jugador al GameManager
+        // Aï¿½adir el nuevo jugador al GameManager
         GameManager.Instance.AddPlayer(nuevoJugador);
 
         // Actualizamos la lista de jugadores
@@ -124,7 +124,7 @@ public class LobbyManager : MonoBehaviour
     }
     private void OnClientDisconnectCallback(ulong clientId)
     {
-        // Implementa lógica para manejar la desconexión si es necesario
+        // Implementa lï¿½gica para manejar la desconexiï¿½n si es necesario
     }
 
     private void UpdatePlayersList()
