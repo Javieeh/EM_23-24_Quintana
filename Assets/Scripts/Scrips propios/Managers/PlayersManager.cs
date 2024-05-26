@@ -68,7 +68,7 @@ public class PlayersManager : Singleton<PlayersManager>
         }
 
         // Instancia el jugador en la posición del placeholder y con la rotación predeterminada
-        GameObject player = Instantiate(playerPrefab, spawnPosition, Quaternion.identity);
+        GameObject player = Instantiate(playerPrefab, spawnPosition, spawnPoint.rotation);
         NetworkObject networkObject = player.GetComponent<NetworkObject>();
 
         if (networkObject == null)
