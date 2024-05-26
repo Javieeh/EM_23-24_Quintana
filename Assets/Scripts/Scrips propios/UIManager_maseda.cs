@@ -2,7 +2,7 @@ using Unity.Netcode;
 using UnityEngine;
 using TMPro;
 
-public class UIManager : NetworkBehaviour
+public class UIManager_maseda : NetworkBehaviour
 {
     public TextMeshProUGUI pann;
     static TextMeshProUGUI pann2;
