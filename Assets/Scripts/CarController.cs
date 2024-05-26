@@ -206,5 +206,11 @@ public class CarController : MonoBehaviour
         CurrentRotation = transform.eulerAngles.y;
     }
 
+
+    public void Shoot()
+    {
+        Debug.Log("¡Disparar!");
+    }
+
     #endregion
 }

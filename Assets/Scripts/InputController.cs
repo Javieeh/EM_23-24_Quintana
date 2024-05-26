@@ -26,5 +26,16 @@ public class InputController : MonoBehaviour
 
     public void OnAttack(InputAction.CallbackContext context)
     {
+        if (context.performed)
+        {
+            if (car != null)
+            {
+                car.Shoot();
+            }
+            else
+            {
+                Debug.LogError("CarController no está inicializado.");
+            }
+        }
     }
 }
