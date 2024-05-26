@@ -6,7 +6,11 @@ using UnityEngine;
 
 public class PlayersManager : Singleton<PlayersManager>
 {
+    [SerializeField]
+    private Transform[] placeholders; // Array de posiciones para los jugadores
+
     private NetworkVariable<int> playersInGame = new NetworkVariable<int>();
+    private int nextPlaceholderIndex = 0; // Índice para el siguiente placeholder disponible
 
     public int PlayersInGame
     {
@@ -28,6 +32,7 @@ public class PlayersManager : Singleton<PlayersManager>
         {
             Debug.Log("Someone connected...");
             playersInGame.Value++;
+            SpawnPlayer(clientId);
         }
     }
 
@@ -37,7 +42,45 @@ public class PlayersManager : Singleton<PlayersManager>
         {
             Debug.Log("Someone disconnected...");
             playersInGame.Value--;
+            // Aquí podrías implementar la lógica para liberar el placeholder si es necesario
         }
+    }
+
+    public void SpawnPlayer(ulong clientId)
+    {
+        if (nextPlaceholderIndex >= placeholders.Length)
+        {
+            Debug.LogError("Not enough placeholders for players.");
+            return;
+        }
+
+        Transform spawnPoint = placeholders[nextPlaceholderIndex];
+        Vector3 spawnPosition = spawnPoint.position;
+
+        // Obtén el prefab del jugador registrado en el NetworkManager
+        GameObject playerPrefab = NetworkManager.Singleton.NetworkConfig.PlayerPrefab;
+
+        if (playerPrefab == null)
+        {
+            Debug.LogError("Player Prefab is not set in the NetworkManager.");
+            return;
+        }
+
+        // Instancia el jugador en la posición del placeholder y con la rotación predeterminada
+        GameObject player = Instantiate(playerPrefab, spawnPosition, Quaternion.identity);
+        NetworkObject networkObject = player.GetComponent<NetworkObject>();
+
+        if (networkObject == null)
+        {
+            Debug.LogError("Player Prefab does not have a NetworkObject component.");
+            Destroy(player);
+            return;
+        }
+
+        // Marca el objeto como perteneciente al jugador local y lo instancia en la red
+        networkObject.SpawnAsPlayerObject(clientId);
+
+        nextPlaceholderIndex++;
     }
 
     void Update()

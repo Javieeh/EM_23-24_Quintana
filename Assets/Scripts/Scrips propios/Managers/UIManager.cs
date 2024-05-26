@@ -14,7 +14,6 @@ public class UIManager : MonoBehaviour
     [SerializeField] private Button startClientButton;
 
     [SerializeField] private TextMeshProUGUI playersInGameText;
-    
 
 
     private void Awake()
@@ -34,15 +33,24 @@ public class UIManager : MonoBehaviour
         {
             if (NetworkManager.Singleton.StartHost())
             {
-                Console.WriteLine("Host started...");
+                Debug.Log("Host started...");
+
+                PlayersManager playerManager = new PlayersManager();
+                if (playerManager != null)
+                {
+                    // Llamar al método SpawnPlayer de PlayersManager con el índice del placeholder
+                    playerManager.SpawnPlayer(NetworkManager.Singleton.LocalClientId); // Por ejemplo, el primer placeholder
+                }
+                else
+                {
+                    Debug.LogError("PlayersManager instance is null.");
+                }
             }
             else
             {
-                Console.WriteLine("Host could not be started...");
-
+                Debug.LogError("Host could not be started...");
             }
-        }
-        );
+        });
         startServerButton.onClick.AddListener(() =>
         {
             if (NetworkManager.Singleton.StartServer())
@@ -69,10 +77,12 @@ public class UIManager : MonoBehaviour
             }
         }
         );
-
-
-
     }
 
-    
+
+
+
 }
+
+    
+
