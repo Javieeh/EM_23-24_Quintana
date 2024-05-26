@@ -12,6 +12,7 @@ public class PlayersManager : Singleton<PlayersManager>
     private NetworkVariable<int> playersInGame = new NetworkVariable<int>();
     private int nextPlaceholderIndex = 0; // Índice para el siguiente placeholder disponible
 
+    [SerializeField] private GameObject prefab;
     public int PlayersInGame
     {
         get
@@ -58,7 +59,7 @@ public class PlayersManager : Singleton<PlayersManager>
         Vector3 spawnPosition = spawnPoint.position;
 
         // Obtén el prefab del jugador registrado en el NetworkManager
-        GameObject playerPrefab = NetworkManager.Singleton.NetworkConfig.PlayerPrefab;
+        GameObject playerPrefab = prefab;
 
         if (playerPrefab == null)
         {
@@ -78,7 +79,7 @@ public class PlayersManager : Singleton<PlayersManager>
         }
 
         // Marca el objeto como perteneciente al jugador local y lo instancia en la red
-        networkObject.SpawnAsPlayerObject(clientId);
+        networkObject.SpawnAsPlayerObject(clientId, true);
 
         nextPlaceholderIndex++;
     }

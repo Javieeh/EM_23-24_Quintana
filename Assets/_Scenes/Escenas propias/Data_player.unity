@@ -953,6 +953,7 @@ MonoBehaviour:
   - {fileID: 1078654311}
   - {fileID: 710479061}
   - {fileID: 1977662624}
+  prefab: {fileID: 197096284232748267, guid: 8cb0f194315f5874797b12dac7f6cdfb, type: 3}
 --- !u!1 &693377436
 GameObject:
   m_ObjectHideFlags: 0
@@ -1839,7 +1840,7 @@ MonoBehaviour:
   NetworkConfig:
     ProtocolVersion: 0
     NetworkTransport: {fileID: 976345840}
-    PlayerPrefab: {fileID: 197096284232748267, guid: 8cb0f194315f5874797b12dac7f6cdfb, type: 3}
+    PlayerPrefab: {fileID: 0}
     Prefabs:
       NetworkPrefabsLists:
       - {fileID: 11400000, guid: 65eccc270ff94784db824b13db72aaf4, type: 2}
