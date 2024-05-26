@@ -1,5 +1,7 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.UI; // Añadir esta línea
 using UnityEngine;
 
 public class CarController : MonoBehaviour
@@ -15,6 +17,7 @@ public class CarController : MonoBehaviour
     [SerializeField] private float topSpeed = 200f;
     [SerializeField] private float downForce = 100f;
     [SerializeField] private float slipLimit = 0.2f;
+    [SerializeField] private float penaltyTime = 1f; // Tiempo de penalización en segundos
 
     private float CurrentRotation { get; set; }
     public float InputAcceleration { get; set; }
@@ -26,8 +29,13 @@ public class CarController : MonoBehaviour
     private Rigidbody _rigidbody;
     private float _steerHelper = 0.8f;
 
+    //Detección de colisiones
+    private bool isPenalized = false;
+    public Image fadeImage; // Añadir referencia a la imagen de fundido
+    private GameObject lastRoadSegment; // para calcular la posicion tras haberse producido la colisión
 
     private float _currentSpeed = 0;
+    
 
     private float Speed
     {
@@ -52,6 +60,11 @@ public class CarController : MonoBehaviour
     public void Awake()
     {
         _rigidbody = GetComponent<Rigidbody>();
+
+    }
+    public void SetLastRoadSegment(GameObject roadSegment)
+    {
+        lastRoadSegment = roadSegment;
     }
 
     public void Update()
@@ -116,6 +129,83 @@ public class CarController : MonoBehaviour
         SpeedLimiter();
         AddDownForce();
         TractionControl();
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Obstacle") && !isPenalized)
+        {
+            StartCoroutine(ApplyPenalty());
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Carretera"))
+        {
+            lastRoadSegment = other.gameObject;
+        }
+    }
+
+    private IEnumerator ApplyPenalty()
+    {
+        isPenalized = true;
+        yield return StartCoroutine(FadeToBlack());
+
+        // Reposicionar el coche aquí
+        RespawnCar();
+
+        yield return new WaitForSeconds(penaltyTime);
+        yield return StartCoroutine(FadeToClear());
+        isPenalized = false;
+    }
+    private IEnumerator FadeToBlack()
+    {
+        
+        float elapsedTime = 0f;
+        Color color = fadeImage.color;
+
+        while (elapsedTime < penaltyTime)
+        {
+            color.a = Mathf.Lerp(0, 1, elapsedTime / penaltyTime);
+            fadeImage.color = color;
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+
+        color.a = 1;
+        fadeImage.color = color;
+    }
+
+    private IEnumerator FadeToClear()
+    {
+        float fadeDuration = 1f;
+        float elapsedTime = 0f;
+        Color color = fadeImage.color;
+
+        while (elapsedTime < fadeDuration)
+        {
+            color.a = Mathf.Lerp(1, 0, elapsedTime / fadeDuration);
+            fadeImage.color = color;
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+
+        color.a = 0;
+        fadeImage.color = color;
+    }
+
+    private void RespawnCar()
+    {
+        // Lógica para reposicionar el coche dentro de la pista
+        Vector3 respawnPosition = lastRoadSegment.transform.position;
+        respawnPosition.y += 1;
+        Quaternion respawnRotation = lastRoadSegment.transform.rotation;
+
+        _rigidbody.position = respawnPosition;
+        _rigidbody.rotation = respawnRotation * Quaternion.Euler(1,0,1);
+        _rigidbody.velocity = Vector3.zero;
+        _rigidbody.angularVelocity = Vector3.zero;
     }
 
     #endregion
