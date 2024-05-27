@@ -5,6 +5,7 @@ using UnityEngine.InputSystem;
 public class InputController : MonoBehaviour
 {
     private CarController car;
+    
 
     private void Start()
     {
@@ -28,14 +29,7 @@ public class InputController : MonoBehaviour
     {
         if (context.performed)
         {
-            if (car != null)
-            {
-                car.Shoot();
-            }
-            else
-            {
-                Debug.LogError("CarController no está inicializado.");
-            }
+            car.Shoot();
         }
     }
 }
