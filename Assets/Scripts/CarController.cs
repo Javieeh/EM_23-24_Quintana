@@ -33,6 +33,7 @@ public class CarController : MonoBehaviour
     private bool isPenalized = false;
     public Image fadeImage; // Añadir referencia a la imagen de fundido
     private GameObject lastRoadSegment; // para calcular la posicion tras haberse producido la colisión
+    private RespawnInfo lastRespawnInfo;
 
     private float _currentSpeed = 0;
     
@@ -62,6 +63,13 @@ public class CarController : MonoBehaviour
         _rigidbody = GetComponent<Rigidbody>();
 
     }
+
+
+    public void SetLastRespawnInfo(RespawnInfo respawnInfo)
+    {
+        lastRespawnInfo = respawnInfo;
+    }
+
     public void SetLastRoadSegment(GameObject roadSegment)
     {
         lastRoadSegment = roadSegment;
@@ -72,8 +80,16 @@ public class CarController : MonoBehaviour
         Speed = _rigidbody.velocity.magnitude;
     }
 
+
     public void FixedUpdate()
     {
+        // Detectar si el coche está volcado o de canto
+        if (!isPenalized && IsCarInUnstablePosition())
+        {
+            StartCoroutine(ApplyPenalty());
+            
+        }
+
         InputSteering = Mathf.Clamp(InputSteering, -1, 1);
         InputAcceleration = Mathf.Clamp(InputAcceleration, -1, 1);
         InputBrake = Mathf.Clamp(InputBrake, 0, 1);
@@ -130,7 +146,27 @@ public class CarController : MonoBehaviour
         AddDownForce();
         TractionControl();
     }
+    private bool IsCarInUnstablePosition()
+    {
+        // Consideramos que el coche está en una posición inestable si está inclinado más de 45 grados en cualquier dirección
+        float angleThreshold = 0.7f; // Cosine of 45 degrees is approximately 0.7
 
+        // Verificar si el coche está "volcado" (upside down)
+        if (Vector3.Dot(transform.up, Vector3.up) < -angleThreshold)
+        {
+            return true;
+        }
+
+        // Verificar si el coche está de lado (cualquiera de las dos direcciones laterales)
+        if (Mathf.Abs(Vector3.Dot(transform.right, Vector3.up)) > angleThreshold)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    #region Colisiones y reaparicion
     private void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.CompareTag("Obstacle") && !isPenalized)
@@ -143,7 +179,11 @@ public class CarController : MonoBehaviour
     {
         if (other.CompareTag("Carretera"))
         {
-            lastRoadSegment = other.gameObject;
+            RespawnInfo respawnInfo = other.GetComponent<RespawnInfo>();
+            if (respawnInfo != null)
+            {
+                SetLastRespawnInfo(respawnInfo);
+            }
         }
     }
 
@@ -197,16 +237,18 @@ public class CarController : MonoBehaviour
 
     private void RespawnCar()
     {
-        // Lógica para reposicionar el coche dentro de la pista
-        Vector3 respawnPosition = lastRoadSegment.transform.position;
-        respawnPosition.y += 1;
-        Quaternion respawnRotation = lastRoadSegment.transform.rotation;
+        
+            Vector3 respawnPosition = lastRespawnInfo.respawnPoint.position;
+            Quaternion respawnRotation = lastRespawnInfo.respawnPoint.rotation;
 
-        _rigidbody.position = respawnPosition;
-        _rigidbody.rotation = respawnRotation * Quaternion.Euler(1,0,1);
-        _rigidbody.velocity = Vector3.zero;
-        _rigidbody.angularVelocity = Vector3.zero;
+            _rigidbody.position = respawnPosition;
+            _rigidbody.rotation = respawnRotation;
+            _rigidbody.velocity = Vector3.zero;
+           _rigidbody.angularVelocity = Vector3.zero;
+        
     }
+
+    #endregion
 
     #endregion
 
