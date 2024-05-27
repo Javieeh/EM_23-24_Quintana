@@ -14,6 +14,10 @@ public class Player : MonoBehaviour
     public int CurrentPosition { get; set; }
     public int CurrentLap { get; set; }
 
+
+    //vida del coche
+    public int life;
+
     //public override void OnNetworkSpawn()
     //{
     //    if (IsOwner)
@@ -38,5 +42,17 @@ public class Player : MonoBehaviour
     private void Start()
     {
         //GameManager.Instance.currentRace.AddPlayer(this);
+        life = 5;
+    }
+
+    private void Update()
+    {
+        if (life <= 0) // en caso de quedarse sin vida, destruimos
+        {
+            Debug.Log("jugador eliminado");
+
+            //destruimos
+            Destroy(gameObject);
+        }
     }
 }
