@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 
 public class ButtonMainMenu : MonoBehaviour
 {
@@ -31,9 +32,9 @@ public class ButtonMainMenu : MonoBehaviour
 
     }
 
-    public void ChangeScene()
+    public void ChangeScene(string s)
     {
-
+        SceneManager.LoadScene(s);
     }
 
     public void OpenCanvas(bool change)
@@ -82,4 +83,11 @@ public class ButtonMainMenu : MonoBehaviour
             creditos[i].SetActive(true);
         }
     }
+
+    public void QuitGame()
+    {
+        Debug.Log("Quitting game...");
+        Application.Quit();
+    }
+
 }
