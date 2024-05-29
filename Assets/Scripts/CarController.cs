@@ -35,6 +35,9 @@ public class CarController : MonoBehaviour
     private GameObject lastRoadSegment; // para calcular la posicion tras haberse producido la colisión
     private RespawnInfo lastRespawnInfo;
 
+    //Dirección de carrera
+    private CheckpointManager checkpointManager;
+
     private float _currentSpeed = 0;
     
 
@@ -61,6 +64,12 @@ public class CarController : MonoBehaviour
     public void Awake()
     {
         _rigidbody = GetComponent<Rigidbody>();
+
+        checkpointManager = FindObjectOfType<CheckpointManager>();
+        if (checkpointManager == null)
+        {
+            Debug.LogError("CheckpointManager not found in the scene.");
+        }
 
     }
 
@@ -177,14 +186,35 @@ public class CarController : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        if (other.CompareTag("Obstacle") && !isPenalized)
+        {
+            StartCoroutine(ApplyPenalty());
+        }
+
         if (other.CompareTag("Carretera"))
         {
+            
             RespawnInfo respawnInfo = other.GetComponent<RespawnInfo>();
             if (respawnInfo != null)
             {
                 SetLastRespawnInfo(respawnInfo);
             }
         }
+
+        // Comprobación de checkpoints
+        Checkpoint checkpoint = other.GetComponent<Checkpoint>();
+        if (checkpoint != null && checkpointManager != null)
+        {
+            checkpointManager.CheckpointReached(checkpoint);
+        }
+
+        // Comprobación de la línea de meta
+        if (other.CompareTag("Finish") && checkpointManager != null)
+        {
+            checkpointManager.FinishLineReached();
+        }
+
+
     }
 
     private IEnumerator ApplyPenalty()
@@ -249,6 +279,8 @@ public class CarController : MonoBehaviour
     }
 
     #endregion
+
+   
 
     #endregion
 
