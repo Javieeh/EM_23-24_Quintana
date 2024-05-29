@@ -35,6 +35,8 @@ public class CarController : MonoBehaviour
     private GameObject lastRoadSegment; // para calcular la posicion tras haberse producido la colisi�n
     private RespawnInfo lastRespawnInfo;
 
+    public Text wrongWayText;
+
     //Direcci�n de carrera
     private CheckpointManager checkpointManager;
 
@@ -66,6 +68,8 @@ public class CarController : MonoBehaviour
         _rigidbody = GetComponent<Rigidbody>();
 
         checkpointManager = FindObjectOfType<CheckpointManager>();
+        wrongWayText.gameObject.SetActive(false);
+
         if (checkpointManager == null)
         {
             Debug.LogError("CheckpointManager not found in the scene.");
@@ -86,7 +90,14 @@ public class CarController : MonoBehaviour
 
     public void Update()
     {
+        if (Input.GetKeyDown(KeyCode.C))
+        {
+            StartCoroutine(ApplyPenalty());
+        }
+
         Speed = _rigidbody.velocity.magnitude;
+
+        CheckWrongWay();
     }
 
 
@@ -280,7 +291,29 @@ public class CarController : MonoBehaviour
 
     #endregion
 
-   
+    private void CheckWrongWay()
+    {
+        if (lastRespawnInfo == null || lastRespawnInfo.respawnPoint == null) return;
+
+        Vector3 directionToRespawn = lastRespawnInfo.respawnPoint.forward;
+        float angle = Vector3.Angle(transform.forward, directionToRespawn);
+
+        if (angle > 90f)
+        {
+            if (wrongWayText != null)
+            {
+                wrongWayText.gameObject.SetActive(true);
+                Debug.Log("You are going the wrong way!");
+            }
+        }
+        else
+        {
+            if (wrongWayText != null)
+            {
+                wrongWayText.gameObject.SetActive(false);
+            }
+        }
+    }
 
     #endregion
 
