@@ -1,7 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine.UI; // Añadir esta línea
+using UnityEngine.UI; // Aï¿½adir esta lï¿½nea
 using UnityEngine;
 
 public class CarController : MonoBehaviour
@@ -17,7 +17,7 @@ public class CarController : MonoBehaviour
     [SerializeField] private float topSpeed = 200f;
     [SerializeField] private float downForce = 100f;
     [SerializeField] private float slipLimit = 0.2f;
-    [SerializeField] private float penaltyTime = 1f; // Tiempo de penalización en segundos
+    [SerializeField] private float penaltyTime = 1f; // Tiempo de penalizaciï¿½n en segundos
 
     private float CurrentRotation { get; set; }
     public float InputAcceleration { get; set; }
@@ -29,16 +29,16 @@ public class CarController : MonoBehaviour
     private Rigidbody _rigidbody;
     private float _steerHelper = 0.8f;
 
-    //Detección de colisiones
+    //Detecciï¿½n de colisiones
     private bool isPenalized = false;
-    public Image fadeImage; // Añadir referencia a la imagen de fundido
-    private GameObject lastRoadSegment; // para calcular la posicion tras haberse producido la colisión
+    public Image fadeImage; // Aï¿½adir referencia a la imagen de fundido
+    private GameObject lastRoadSegment; // para calcular la posicion tras haberse producido la colisiï¿½n
     private RespawnInfo lastRespawnInfo;
 
-    //Dirección de carrera
+    //Direcciï¿½n de carrera
     private CheckpointManager checkpointManager;
 
-    private float _currentSpeed = 0;
+    public float _currentSpeed = 0;
     
 
     private float Speed
@@ -92,7 +92,7 @@ public class CarController : MonoBehaviour
 
     public void FixedUpdate()
     {
-        // Detectar si el coche está volcado o de canto
+        // Detectar si el coche estï¿½ volcado o de canto
         if (!isPenalized && IsCarInUnstablePosition())
         {
             StartCoroutine(ApplyPenalty());
@@ -157,16 +157,16 @@ public class CarController : MonoBehaviour
     }
     private bool IsCarInUnstablePosition()
     {
-        // Consideramos que el coche está en una posición inestable si está inclinado más de 45 grados en cualquier dirección
+        // Consideramos que el coche estï¿½ en una posiciï¿½n inestable si estï¿½ inclinado mï¿½s de 45 grados en cualquier direcciï¿½n
         float angleThreshold = 0.7f; // Cosine of 45 degrees is approximately 0.7
 
-        // Verificar si el coche está "volcado" (upside down)
+        // Verificar si el coche estï¿½ "volcado" (upside down)
         if (Vector3.Dot(transform.up, Vector3.up) < -angleThreshold)
         {
             return true;
         }
 
-        // Verificar si el coche está de lado (cualquiera de las dos direcciones laterales)
+        // Verificar si el coche estï¿½ de lado (cualquiera de las dos direcciones laterales)
         if (Mathf.Abs(Vector3.Dot(transform.right, Vector3.up)) > angleThreshold)
         {
             return true;
@@ -201,14 +201,14 @@ public class CarController : MonoBehaviour
             }
         }
 
-        // Comprobación de checkpoints
+        // Comprobaciï¿½n de checkpoints
         Checkpoint checkpoint = other.GetComponent<Checkpoint>();
         if (checkpoint != null && checkpointManager != null)
         {
             checkpointManager.CheckpointReached(checkpoint);
         }
 
-        // Comprobación de la línea de meta
+        // Comprobaciï¿½n de la lï¿½nea de meta
         if (other.CompareTag("Finish") && checkpointManager != null)
         {
             checkpointManager.FinishLineReached();
@@ -222,7 +222,7 @@ public class CarController : MonoBehaviour
         isPenalized = true;
         yield return StartCoroutine(FadeToBlack());
 
-        // Reposicionar el coche aquí
+        // Reposicionar el coche aquï¿½
         RespawnCar();
 
         yield return new WaitForSeconds(penaltyTime);
