@@ -43,6 +43,13 @@ public class CarController : MonoBehaviour
     public float _currentSpeed = 0;
     
 
+
+    //Disparar
+    public Transform projectileSpawn;
+    public GameObject projectilePrefab;
+    public float projectileSpeed = 20f;
+    public float projectileLife = 5f;
+
     private float Speed
     {
         get => _currentSpeed;
@@ -401,6 +408,25 @@ public class CarController : MonoBehaviour
         }
 
         CurrentRotation = transform.eulerAngles.y;
+    }
+
+
+    public void Shoot()
+    {
+        // Instancia el proyectil en la posición y rotación del punto de origen
+        GameObject projectile = Instantiate(projectilePrefab, projectileSpawn.position, projectileSpawn.rotation);
+
+        // Añade una fuerza al proyectil para que se mueva en la dirección del coche
+        Rigidbody rb = projectile.GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            rb.velocity = projectileSpawn.forward * projectileSpeed;
+        }
+
+        // Destruye el proyectil después de projectileLifetime segundos
+        Destroy(projectile, projectileLife);
+
+        Debug.Log("Shooting from the car!");
     }
 
     #endregion

@@ -5,6 +5,7 @@ using UnityEngine.InputSystem;
 public class InputController : MonoBehaviour
 {
     private CarController car;
+    
 
     private void Start()
     {
@@ -26,5 +27,9 @@ public class InputController : MonoBehaviour
 
     public void OnAttack(InputAction.CallbackContext context)
     {
+        if (context.performed)
+        {
+            car.Shoot();
+        }
     }
 }
