@@ -6,7 +6,7 @@ public class CheckpointManager : MonoBehaviour
     public List<Checkpoint> checkpoints; // Lista de checkpoints en el orden correcto
     private int currentCheckpointIndex = 0;
     private int currentLap = 0;
-    public int totalLaps = 3; // Número total de vueltas
+    public int totalLaps = 3; // Nï¿½mero total de vueltas
     private bool raceCompleted = false;
 
     private void Start()
@@ -23,12 +23,12 @@ public class CheckpointManager : MonoBehaviour
 
         if (currentCheckpointIndex < checkpoints.Count && checkpoints[currentCheckpointIndex] == checkpoint)
         {
-            Debug.Log("Checkpoint " + currentCheckpointIndex + " reached");
+           Debug.Log("Checkpoint " + currentCheckpointIndex + " reached");
             currentCheckpointIndex++;
 
             if (currentCheckpointIndex >= checkpoints.Count)
             {
-                Debug.Log("All checkpoints reached for this lap. You can now finish the lap!");
+               Debug.Log("All checkpoints reached for this lap. You can now finish the lap!");
             }
         }
         else
@@ -51,7 +51,7 @@ public class CheckpointManager : MonoBehaviour
             }
             else
             {
-                currentCheckpointIndex = 0; // Reiniciar el índice de checkpoints para la nueva vuelta
+                currentCheckpointIndex = 0; // Reiniciar el ï¿½ndice de checkpoints para la nueva vuelta
                 Debug.Log("Starting lap " + (currentLap + 1));
             }
         }

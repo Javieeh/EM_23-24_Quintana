@@ -37,9 +37,13 @@ public class CarController : MonoBehaviour
 
     //Direcci�n de carrera
     private CheckpointManager checkpointManager;
+    private LapTimeController lapTimeController;
 
     public float _currentSpeed = 0;
-    
+    // Variable auxiliar para no resetear el contador de la vuelta actual al comenzar la carrera
+    // Ya que comienzas detras de la meta y al avanzar se te resetearia
+    private bool validReset = false;
+
 
     private float Speed
     {
@@ -70,6 +74,11 @@ public class CarController : MonoBehaviour
         {
             Debug.LogError("CheckpointManager not found in the scene.");
         }
+        lapTimeController = FindObjectOfType<LapTimeController>();
+        if (lapTimeController == null)
+        {
+            Debug.LogError("LapTimeController not found in the scene.");
+        }
 
     }
 
@@ -96,7 +105,7 @@ public class CarController : MonoBehaviour
         if (!isPenalized && IsCarInUnstablePosition())
         {
             StartCoroutine(ApplyPenalty());
-            
+
         }
 
         InputSteering = Mathf.Clamp(InputSteering, -1, 1);
@@ -193,7 +202,7 @@ public class CarController : MonoBehaviour
 
         if (other.CompareTag("Carretera"))
         {
-            
+
             RespawnInfo respawnInfo = other.GetComponent<RespawnInfo>();
             if (respawnInfo != null)
             {
@@ -205,6 +214,10 @@ public class CarController : MonoBehaviour
         Checkpoint checkpoint = other.GetComponent<Checkpoint>();
         if (checkpoint != null && checkpointManager != null)
         {
+            if (checkpoint.gameObject.name == "CheckPoint 0" && !validReset){
+                Debug.Log("No es valido, lo pongo true pa la proxima");
+                validReset = true;                
+            }
             checkpointManager.CheckpointReached(checkpoint);
         }
 
@@ -212,6 +225,17 @@ public class CarController : MonoBehaviour
         if (other.CompareTag("Finish") && checkpointManager != null)
         {
             checkpointManager.FinishLineReached();
+            if (!validReset)
+            { 
+                // Si no es valido, NO hago nada                
+            }
+            if (validReset)
+            {
+                Debug.Log("Reinicio");
+                lapTimeController.StartNewLap();
+            };
+            
+
         }
 
 
@@ -231,7 +255,7 @@ public class CarController : MonoBehaviour
     }
     private IEnumerator FadeToBlack()
     {
-        
+
         float elapsedTime = 0f;
         Color color = fadeImage.color;
 
@@ -267,20 +291,20 @@ public class CarController : MonoBehaviour
 
     private void RespawnCar()
     {
-        
-            Vector3 respawnPosition = lastRespawnInfo.respawnPoint.position;
-            Quaternion respawnRotation = lastRespawnInfo.respawnPoint.rotation;
 
-            _rigidbody.position = respawnPosition;
-            _rigidbody.rotation = respawnRotation;
-            _rigidbody.velocity = Vector3.zero;
-           _rigidbody.angularVelocity = Vector3.zero;
-        
+        Vector3 respawnPosition = lastRespawnInfo.respawnPoint.position;
+        Quaternion respawnRotation = lastRespawnInfo.respawnPoint.rotation;
+
+        _rigidbody.position = respawnPosition;
+        _rigidbody.rotation = respawnRotation;
+        _rigidbody.velocity = Vector3.zero;
+        _rigidbody.angularVelocity = Vector3.zero;
+
     }
 
     #endregion
 
-   
+
 
     #endregion
 
@@ -310,7 +334,7 @@ public class CarController : MonoBehaviour
         }
     }
 
-// this is used to add more grip in relation to speed
+    // this is used to add more grip in relation to speed
     private void AddDownForce()
     {
         foreach (var axleInfo in axleInfos)
@@ -327,8 +351,8 @@ public class CarController : MonoBehaviour
             _rigidbody.velocity = topSpeed * _rigidbody.velocity.normalized;
     }
 
-// finds the corresponding visual wheel
-// correctly applies the transform
+    // finds the corresponding visual wheel
+    // correctly applies the transform
     public void ApplyLocalPositionToVisuals(WheelCollider col)
     {
         if (col.transform.childCount == 0)
@@ -359,7 +383,7 @@ public class CarController : MonoBehaviour
             }
         }
 
-// this if is needed to avoid gimbal lock problems that will make the car suddenly shift direction
+        // this if is needed to avoid gimbal lock problems that will make the car suddenly shift direction
         if (Mathf.Abs(CurrentRotation - transform.eulerAngles.y) < 10f)
         {
             var turnAdjust = (transform.eulerAngles.y - CurrentRotation) * _steerHelper;
