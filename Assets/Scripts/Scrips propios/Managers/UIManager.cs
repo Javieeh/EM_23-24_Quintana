@@ -1,9 +1,9 @@
-using UnityEngine;
-using UnityEngine.UI;
 using TMPro;
 using Unity.Netcode;
+using UnityEngine;
+using UnityEngine.UI;
 
-public class UIManager : MonoBehaviour
+public class UIManager : Singleton<UIManager>
 {
     [Header("INITIAL MENU")]
     [SerializeField] private GameObject initialMenu;
@@ -14,6 +14,7 @@ public class UIManager : MonoBehaviour
     [Header("SELECTION MENU")]
     [SerializeField] private GameObject selectionMenu;
     [SerializeField] private TextMeshProUGUI playersInGameText;
+    [SerializeField] private Button readyButton; // Nuevo botón de "listo"
 
     [Header("COLOR MENU")]
     [SerializeField] private Button nextColorButton;
@@ -22,6 +23,15 @@ public class UIManager : MonoBehaviour
     [SerializeField] private TMP_InputField nameInputField;
     [SerializeField] private Button setNameButton;
 
+    [Header("COUNTDOWN")]
+    [SerializeField] private TextMeshProUGUI countdownText;
+
+    [Header("MAP VOTING")]
+    [SerializeField] private Button mapButton1;
+    [SerializeField] private Button mapButton2;
+    [SerializeField] private Button mapButton3;
+    [SerializeField] private Button mapButton4;
+    [SerializeField] private TextMeshProUGUI[] mapVoteTexts;
     private void Awake()
     {
         Cursor.visible = true;
@@ -98,6 +108,36 @@ public class UIManager : MonoBehaviour
                 localPlayerName.SetName(nameInputField.text);
             }
         });
+
+        readyButton.onClick.AddListener(() =>
+        {
+            var localPlayerReady = FindLocalPlayer<PlayerReady>();
+            if (localPlayerReady != null)
+            {
+                localPlayerReady.SetReady();
+            }
+        });
+
+        mapButton1.onClick.AddListener(() => VoteForMap(0));
+        mapButton2.onClick.AddListener(() => VoteForMap(1));
+        mapButton3.onClick.AddListener(() => VoteForMap(2));
+        mapButton4.onClick.AddListener(() => VoteForMap(3));
+    }
+    private void VoteForMap(int mapIndex)
+    {
+        if (NetworkManager.Singleton.IsClient)
+        {
+            PlayerVote.Instance.VoteForMapServerRpc(mapIndex);
+        }
+    }
+
+    public void UpdateMapVotes(int[] mapVotes)
+    {
+        // Actualizar los textos de los botones de mapa con el número de votos
+        for (int i = 0; i < mapVoteTexts.Length; i++)
+        {
+            mapVoteTexts[i].text = $"Map {i + 1}: {mapVotes[i]} votes";
+        }
     }
 
     private T FindLocalPlayer<T>() where T : NetworkBehaviour
@@ -111,5 +151,13 @@ public class UIManager : MonoBehaviour
             }
         }
         return null;
+    }
+
+    public void UpdateCountdownText(int timeRemaining)
+    {
+        if (countdownText != null)
+        {
+            countdownText.text = $"Game starts in: {timeRemaining} seconds";
+        }
     }
 }

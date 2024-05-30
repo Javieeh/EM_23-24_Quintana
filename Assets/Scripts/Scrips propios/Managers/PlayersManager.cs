@@ -11,8 +11,11 @@ public class PlayersManager : Singleton<PlayersManager>
 
     private NetworkVariable<int> playersInGame = new NetworkVariable<int>();
     private int nextPlaceholderIndex = 0; // Índice para el siguiente placeholder disponible
+    private int readyPlayersCount = 0; // Conteo de jugadores listos
 
     [SerializeField] private GameObject prefab;
+    [SerializeField] private int countdownTime = 3; // Tiempo de cuenta atrás en segundos
+
     public int PlayersInGame
     {
         get
@@ -21,7 +24,7 @@ public class PlayersManager : Singleton<PlayersManager>
         }
     }
 
-    void Start()
+    private void Start()
     {
         NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
         NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
@@ -33,7 +36,7 @@ public class PlayersManager : Singleton<PlayersManager>
         {
             Debug.Log("Someone connected...");
             playersInGame.Value++;
-            SpawnPlayer(clientId);
+            SpawnPlayer(clientId, "Player" + clientId); // Asignar un nombre inicial basado en el ID del cliente
         }
     }
 
@@ -47,7 +50,7 @@ public class PlayersManager : Singleton<PlayersManager>
         }
     }
 
-    public void SpawnPlayer(ulong clientId)
+    public void SpawnPlayer(ulong clientId, string playerName)
     {
         if (nextPlaceholderIndex >= placeholders.Length)
         {
@@ -81,14 +84,67 @@ public class PlayersManager : Singleton<PlayersManager>
         // Marca el objeto como perteneciente al jugador local y lo instancia en la red
         networkObject.SpawnAsPlayerObject(clientId, true);
 
+        // Asigna el nombre al jugador
+        var playerNameComponent = player.GetComponent<PlayerName>();
+        if (playerNameComponent != null)
+        {
+            playerNameComponent.SetName(playerName);
+        }
+
         nextPlaceholderIndex++;
     }
 
-    void Update()
+    public void CheckReadyStatus()
+    {
+        readyPlayersCount = 0;
+
+        var players = FindObjectsOfType<PlayerReady>();
+        foreach (var player in players)
+        {
+            if (player.IsReady())
+            {
+                readyPlayersCount++;
+            }
+        }
+
+        if (readyPlayersCount >= 2)
+        {
+            StartCoroutine(StartCountdown());
+        }
+    }
+
+    private IEnumerator StartCountdown()
+    {
+        for (int i = countdownTime; i > 0; i--)
+        {
+            // Enviar el tiempo restante a los clientes
+            UpdateCountdownClientRpc(i);
+            yield return new WaitForSeconds(1f);
+        }
+
+        StartGame();
+    }
+
+    [ClientRpc]
+    private void UpdateCountdownClientRpc(int timeRemaining)
+    {
+        //UIManager_gameObject.GetComponent<UIManager>().UpdateCountdownText(timeRemaining);
+        UIManager.Instance.UpdateCountdownText(timeRemaining);
+    }
+
+    private void StartGame()
+    {
+        Debug.Log("Starting game...");
+        // Aquí puedes añadir la lógica para iniciar la partida
+    }
+
+    private void Update()
     {
         // Opcional: cualquier lógica de actualización
     }
 }
+
+
 
 public class Singleton<T> : NetworkBehaviour
     where T : Component
