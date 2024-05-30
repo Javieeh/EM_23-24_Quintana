@@ -1,14 +1,15 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine.UI; // Aï¿½adir esta lï¿½nea
 using UnityEngine;
+using UnityEngine.UI;
 
 public class CarController : MonoBehaviour
 {
     #region Variables
 
-    [Header("Movement")] public List<AxleInfo> axleInfos;
+    [Header("Movement")]
+    public List<AxleInfo> axleInfos;
     [SerializeField] private float forwardMotorTorque = 100000;
     [SerializeField] private float backwardMotorTorque = 50000;
     [SerializeField] private float maxSteeringAngle = 15;
@@ -17,34 +18,30 @@ public class CarController : MonoBehaviour
     [SerializeField] private float topSpeed = 200f;
     [SerializeField] private float downForce = 100f;
     [SerializeField] private float slipLimit = 0.2f;
-    [SerializeField] private float penaltyTime = 1f; // Tiempo de penalizaciï¿½n en segundos
+    [SerializeField] private float penaltyTime = 1f; // Tiempo de penalización en segundos
 
     private float CurrentRotation { get; set; }
     public float InputAcceleration { get; set; }
     public float InputSteering { get; set; }
     public float InputBrake { get; set; }
 
-    //private PlayerInfo m_PlayerInfo;
-
     private Rigidbody _rigidbody;
     private float _steerHelper = 0.8f;
 
-    //Detecciï¿½n de colisiones
+    // Detección de colisiones
     private bool isPenalized = false;
-    public Image fadeImage; // Aï¿½adir referencia a la imagen de fundido
-    private GameObject lastRoadSegment; // para calcular la posicion tras haberse producido la colisiï¿½n
+    public Image fadeImage; // Añadir referencia a la imagen de fundido
+    private GameObject lastRoadSegment; // para calcular la posición tras haberse producido la colisión
     private RespawnInfo lastRespawnInfo;
 
     public Text wrongWayText;
 
-    //Direcciï¿½n de carrera
+    // Dirección de carrera
     private CheckpointManager checkpointManager;
 
     public float _currentSpeed = 0;
-    
 
-
-    //Disparar
+    // Disparar
     public Transform projectileSpawn;
     public GameObject projectilePrefab;
     public float projectileSpeed = 20f;
@@ -57,8 +54,7 @@ public class CarController : MonoBehaviour
         {
             if (Math.Abs(_currentSpeed - value) < float.Epsilon) return;
             _currentSpeed = value;
-            if (OnSpeedChangeEvent != null)
-                OnSpeedChangeEvent(_currentSpeed);
+            OnSpeedChangeEvent?.Invoke(_currentSpeed);
         }
     }
 
@@ -75,15 +71,26 @@ public class CarController : MonoBehaviour
         _rigidbody = GetComponent<Rigidbody>();
 
         checkpointManager = FindObjectOfType<CheckpointManager>();
-        wrongWayText.gameObject.SetActive(false);
+
+        if (wrongWayText != null)
+        {
+            wrongWayText.gameObject.SetActive(false);
+        }
+        else
+        {
+            Debug.LogError("WrongWayText is not assigned in the inspector.");
+        }
 
         if (checkpointManager == null)
         {
             Debug.LogError("CheckpointManager not found in the scene.");
         }
 
+        if (fadeImage == null)
+        {
+            Debug.LogError("FadeImage is not assigned in the inspector.");
+        }
     }
-
 
     public void SetLastRespawnInfo(RespawnInfo respawnInfo)
     {
@@ -102,6 +109,11 @@ public class CarController : MonoBehaviour
             StartCoroutine(ApplyPenalty());
         }
 
+        // Capturar los inputs
+        InputSteering = Input.GetAxis("Horizontal");
+        InputAcceleration = Input.GetAxis("Vertical");
+        InputBrake = Input.GetKey(KeyCode.Space) ? 1 : 0;
+
         Speed = _rigidbody.velocity.magnitude;
 
         CheckWrongWay();
@@ -109,11 +121,10 @@ public class CarController : MonoBehaviour
 
     public void FixedUpdate()
     {
-        // Detectar si el coche estï¿½ volcado o de canto
+        // Detectar si el coche está volcado o de canto
         if (!isPenalized && IsCarInUnstablePosition())
         {
             StartCoroutine(ApplyPenalty());
-
         }
 
         InputSteering = Mathf.Clamp(InputSteering, -1, 1);
@@ -134,21 +145,19 @@ public class CarController : MonoBehaviour
             {
                 if (InputAcceleration > float.Epsilon)
                 {
-                    axleInfo.leftWheel.motorTorque = forwardMotorTorque;
+                    axleInfo.leftWheel.motorTorque = forwardMotorTorque * InputAcceleration;
                     axleInfo.leftWheel.brakeTorque = 0;
-                    axleInfo.rightWheel.motorTorque = forwardMotorTorque;
+                    axleInfo.rightWheel.motorTorque = forwardMotorTorque * InputAcceleration;
                     axleInfo.rightWheel.brakeTorque = 0;
                 }
-
-                if (InputAcceleration < -float.Epsilon)
+                else if (InputAcceleration < -float.Epsilon)
                 {
-                    axleInfo.leftWheel.motorTorque = -backwardMotorTorque;
+                    axleInfo.leftWheel.motorTorque = backwardMotorTorque * InputAcceleration;
                     axleInfo.leftWheel.brakeTorque = 0;
-                    axleInfo.rightWheel.motorTorque = -backwardMotorTorque;
+                    axleInfo.rightWheel.motorTorque = backwardMotorTorque * InputAcceleration;
                     axleInfo.rightWheel.brakeTorque = 0;
                 }
-
-                if (Math.Abs(InputAcceleration) < float.Epsilon)
+                else
                 {
                     axleInfo.leftWheel.motorTorque = 0;
                     axleInfo.leftWheel.brakeTorque = engineBrake;
@@ -172,18 +181,16 @@ public class CarController : MonoBehaviour
         AddDownForce();
         TractionControl();
     }
+
     private bool IsCarInUnstablePosition()
     {
-        // Consideramos que el coche estï¿½ en una posiciï¿½n inestable si estï¿½ inclinado mï¿½s de 45 grados en cualquier direcciï¿½n
         float angleThreshold = 0.7f; // Cosine of 45 degrees is approximately 0.7
 
-        // Verificar si el coche estï¿½ "volcado" (upside down)
         if (Vector3.Dot(transform.up, Vector3.up) < -angleThreshold)
         {
             return true;
         }
 
-        // Verificar si el coche estï¿½ de lado (cualquiera de las dos direcciones laterales)
         if (Mathf.Abs(Vector3.Dot(transform.right, Vector3.up)) > angleThreshold)
         {
             return true;
@@ -210,7 +217,6 @@ public class CarController : MonoBehaviour
 
         if (other.CompareTag("Carretera"))
         {
-            
             RespawnInfo respawnInfo = other.GetComponent<RespawnInfo>();
             if (respawnInfo != null)
             {
@@ -218,20 +224,18 @@ public class CarController : MonoBehaviour
             }
         }
 
-        // Comprobaciï¿½n de checkpoints
+        // Comprobación de checkpoints
         Checkpoint checkpoint = other.GetComponent<Checkpoint>();
         if (checkpoint != null && checkpointManager != null)
         {
             checkpointManager.CheckpointReached(checkpoint);
         }
 
-        // Comprobaciï¿½n de la lï¿½nea de meta
+        // Comprobación de la línea de meta
         if (other.CompareTag("Finish") && checkpointManager != null)
         {
             checkpointManager.FinishLineReached();
         }
-
-
     }
 
     private IEnumerator ApplyPenalty()
@@ -239,16 +243,16 @@ public class CarController : MonoBehaviour
         isPenalized = true;
         yield return StartCoroutine(FadeToBlack());
 
-        // Reposicionar el coche aquï¿½
+        // Reposicionar el coche aquí
         RespawnCar();
 
         yield return new WaitForSeconds(penaltyTime);
         yield return StartCoroutine(FadeToClear());
         isPenalized = false;
     }
+
     private IEnumerator FadeToBlack()
     {
-        
         float elapsedTime = 0f;
         Color color = fadeImage.color;
 
@@ -284,15 +288,28 @@ public class CarController : MonoBehaviour
 
     private void RespawnCar()
     {
-        
+        if (lastRespawnInfo != null && lastRespawnInfo.respawnPoint != null)
+        {
             Vector3 respawnPosition = lastRespawnInfo.respawnPoint.position;
             Quaternion respawnRotation = lastRespawnInfo.respawnPoint.rotation;
 
             _rigidbody.position = respawnPosition;
             _rigidbody.rotation = respawnRotation;
             _rigidbody.velocity = Vector3.zero;
-           _rigidbody.angularVelocity = Vector3.zero;
-        
+            _rigidbody.angularVelocity = Vector3.zero;
+        }
+        else
+        {
+            Debug.LogWarning("lastRespawnInfo or respawnPoint is null. Using default respawn logic.");
+
+            Vector3 respawnPosition = transform.position + transform.forward * 10;
+            Quaternion respawnRotation = Quaternion.LookRotation(transform.forward, Vector3.up);
+
+            _rigidbody.position = respawnPosition;
+            _rigidbody.rotation = respawnRotation;
+            _rigidbody.velocity = Vector3.zero;
+            _rigidbody.angularVelocity = Vector3.zero;
+        }
     }
 
     #endregion
@@ -325,7 +342,6 @@ public class CarController : MonoBehaviour
 
     #region Methods
 
-    // crude traction control that reduces the power to wheel if the car is wheel spinning too much
     private void TractionControl()
     {
         foreach (var axleInfo in axleInfos)
@@ -349,7 +365,6 @@ public class CarController : MonoBehaviour
         }
     }
 
-// this is used to add more grip in relation to speed
     private void AddDownForce()
     {
         foreach (var axleInfo in axleInfos)
@@ -366,8 +381,6 @@ public class CarController : MonoBehaviour
             _rigidbody.velocity = topSpeed * _rigidbody.velocity.normalized;
     }
 
-// finds the corresponding visual wheel
-// correctly applies the transform
     public void ApplyLocalPositionToVisuals(WheelCollider col)
     {
         if (col.transform.childCount == 0)
@@ -394,11 +407,10 @@ public class CarController : MonoBehaviour
             foreach (var wh in wheelHit)
             {
                 if (wh.normal == Vector3.zero)
-                    return; // wheels arent on the ground so dont realign the rigidbody velocity
+                    return; // wheels aren't on the ground so don't realign the rigidbody velocity
             }
         }
 
-// this if is needed to avoid gimbal lock problems that will make the car suddenly shift direction
         if (Mathf.Abs(CurrentRotation - transform.eulerAngles.y) < 10f)
         {
             var turnAdjust = (transform.eulerAngles.y - CurrentRotation) * _steerHelper;
@@ -409,20 +421,16 @@ public class CarController : MonoBehaviour
         CurrentRotation = transform.eulerAngles.y;
     }
 
-
     public void Shoot()
     {
-        // Instancia el proyectil en la posición y rotación del punto de origen
         GameObject projectile = Instantiate(projectilePrefab, projectileSpawn.position, projectileSpawn.rotation);
 
-        // Añade una fuerza al proyectil para que se mueva en la dirección del coche
         Rigidbody rb = projectile.GetComponent<Rigidbody>();
         if (rb != null)
         {
             rb.velocity = projectileSpawn.forward * projectileSpeed;
         }
 
-        // Destruye el proyectil después de projectileLifetime segundos
         Destroy(projectile, projectileLife);
 
         Debug.Log("Shooting from the car!");
