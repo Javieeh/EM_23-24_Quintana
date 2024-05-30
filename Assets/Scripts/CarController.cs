@@ -102,11 +102,6 @@ public class CarController : MonoBehaviour
             StartCoroutine(ApplyPenalty());
         }
 
-        // Capturar los inputs
-        InputSteering = Input.GetAxis("Horizontal");
-        InputAcceleration = Input.GetAxis("Vertical");
-        InputBrake = Input.GetKey(KeyCode.Space) ? 1 : 0;
-
         Speed = _rigidbody.velocity.magnitude;
 
         CheckWrongWay();
@@ -114,10 +109,11 @@ public class CarController : MonoBehaviour
 
     public void FixedUpdate()
     {
-        // Detectar si el coche está volcado o de canto
+        // Detectar si el coche estï¿½ volcado o de canto
         if (!isPenalized && IsCarInUnstablePosition())
         {
             StartCoroutine(ApplyPenalty());
+
         }
 
         InputSteering = Mathf.Clamp(InputSteering, -1, 1);
@@ -138,19 +134,21 @@ public class CarController : MonoBehaviour
             {
                 if (InputAcceleration > float.Epsilon)
                 {
-                    axleInfo.leftWheel.motorTorque = forwardMotorTorque * InputAcceleration;
+                    axleInfo.leftWheel.motorTorque = forwardMotorTorque;
                     axleInfo.leftWheel.brakeTorque = 0;
-                    axleInfo.rightWheel.motorTorque = forwardMotorTorque * InputAcceleration;
+                    axleInfo.rightWheel.motorTorque = forwardMotorTorque;
                     axleInfo.rightWheel.brakeTorque = 0;
                 }
-                else if (InputAcceleration < -float.Epsilon)
+
+                if (InputAcceleration < -float.Epsilon)
                 {
-                    axleInfo.leftWheel.motorTorque = backwardMotorTorque * InputAcceleration;
+                    axleInfo.leftWheel.motorTorque = -backwardMotorTorque;
                     axleInfo.leftWheel.brakeTorque = 0;
-                    axleInfo.rightWheel.motorTorque = backwardMotorTorque * InputAcceleration;
+                    axleInfo.rightWheel.motorTorque = -backwardMotorTorque;
                     axleInfo.rightWheel.brakeTorque = 0;
                 }
-                else
+
+                if (Math.Abs(InputAcceleration) < float.Epsilon)
                 {
                     axleInfo.leftWheel.motorTorque = 0;
                     axleInfo.leftWheel.brakeTorque = engineBrake;
