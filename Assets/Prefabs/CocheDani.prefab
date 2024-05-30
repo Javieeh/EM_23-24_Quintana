@@ -111,7 +111,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6413397898805387534}
   m_LocalRotation: {x: 0.000029286804, y: 0.002692024, z: -0.0000012321881, w: 0.9999964}
-  m_LocalPosition: {x: 0.4, y: 0.2330001, z: -1.32}
+  m_LocalPosition: {x: 0.4, y: 0.2330001, z: 0.946}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children:
@@ -210,7 +210,7 @@ PrefabInstance:
     - target: {fileID: 2292153542682164288, guid: 8cb0f194315f5874797b12dac7f6cdfb, type: 3}
       propertyPath: wheelLeft
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 370421746029613414}
     - target: {fileID: 3781101945983558861, guid: 8cb0f194315f5874797b12dac7f6cdfb, type: 3}
       propertyPath: axleInfos.Array.data[1].leftWheel
       value: 
