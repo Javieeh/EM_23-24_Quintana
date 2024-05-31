@@ -20,6 +20,7 @@ public class PlayerName : NetworkBehaviour
         if (IsOwner)
         {
             SetName("Player" + NetworkManager.Singleton.LocalClientId); // Establece un nombre inicial
+
         }
     }
 
