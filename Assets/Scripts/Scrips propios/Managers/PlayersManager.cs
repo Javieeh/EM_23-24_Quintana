@@ -26,6 +26,11 @@ public class PlayersManager : Singleton<PlayersManager>
         }
     }
 
+    private void Awake()
+    {
+        DontDestroyOnLoad(gameObject);
+    }
+
     private void Start()
     {
         NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
@@ -163,12 +168,54 @@ public class PlayersManager : Singleton<PlayersManager>
         // Esperar a que la escena se cargue
         yield return new WaitForSeconds(1f);
 
-        // Mover a los jugadores a una posición específica (0, 0, 0) en la nueva escena
+        Debug.Log("Loaded CircuitScene, moving players...");
+
+        // Obtener las posiciones de inicio en la escena del circuito
+        Transform[] startPositions = GetStartPositions();
+
+        // Mover a los jugadores a las posiciones iniciales en la nueva escena
+        int index = 0;
         foreach (var player in spawnedPlayers.Values)
         {
-            player.transform.position = new Vector3(7, 3, - 71); //Vector3.zero;
-            player.transform.rotation = Quaternion.identity;
+            if (index < startPositions.Length)
+            {
+                Debug.Log($"Moving player {player.name} to position {startPositions[index].position}");
+                player.transform.position = startPositions[index].position;
+                player.transform.rotation = startPositions[index].rotation;
+                index++;
+            }
+            else
+            {
+                Debug.LogError("Not enough start positions for players.");
+                break;
+            }
         }
+    }
+
+    public Transform GetStartPosition(ulong clientId)
+    {
+        int index = 0;
+        foreach (var kvp in spawnedPlayers)
+        {
+            if (kvp.Key == clientId)
+            {
+                return GetStartPositions()[index];
+            }
+            index++;
+        }
+        return null;
+    }
+
+    private Transform[] GetStartPositions()
+    {
+        // Encuentra los objetos de posición de inicio en la escena del circuito
+        GameObject[] startObjects = GameObject.FindGameObjectsWithTag("StartPosition");
+        Transform[] startPositions = new Transform[startObjects.Length];
+        for (int i = 0; i < startObjects.Length; i++)
+        {
+            startPositions[i] = startObjects[i].transform;
+        }
+        return startPositions;
     }
 
     private void Update()
