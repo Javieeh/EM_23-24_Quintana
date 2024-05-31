@@ -86,6 +86,7 @@ GameObject:
   - component: {fileID: 671877678733908484}
   - component: {fileID: 1223198965769075727}
   - component: {fileID: 6805270397793624104}
+  - component: {fileID: 58575656045842559}
   - component: {fileID: 9026613993243543669}
   - component: {fileID: 8129257496370219418}
   - component: {fileID: 742557163550564685}
@@ -124,7 +125,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 921505662
+  GlobalObjectIdHash: 329344588
   InScenePlacedSourceGlobalObjectIdHash: 0
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
@@ -186,6 +187,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3982ad26c85bee0419062a3a59f77308, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &58575656045842559
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1444720194721529053}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e5da4e5afc3143b40857c18bfe00911f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!114 &9026613993243543669
@@ -700,6 +713,12 @@ MonoBehaviour:
   downForce: 350
   slipLimit: 0.2
   penaltyTime: 1
+  InputAcceleration:
+    m_InternalValue: 0
+  InputSteering:
+    m_InternalValue: 0
+  InputBrake:
+    m_InternalValue: 0
   fadeImage: {fileID: 0}
   _currentSpeed: 0
   id: 0
