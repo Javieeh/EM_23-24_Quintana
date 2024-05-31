@@ -147,6 +147,9 @@ public class PlayersManager : Singleton<PlayersManager>
     {
         Debug.Log("Starting game...");
         LoadCircuitSceneClientRpc();
+
+        //PARTE RAFA
+        
     }
 
     [ClientRpc]
@@ -201,9 +204,27 @@ public class Singleton<T> : NetworkBehaviour where T : Component
                     GameObject obj = new GameObject();
                     obj.name = string.Format("_{0}", typeof(T).Name);
                     _instance = obj.AddComponent<T>();
+                    DontDestroyOnLoad(obj);
+                }
+                else
+                {
+                    DontDestroyOnLoad(_instance.gameObject);
                 }
             }
             return _instance;
+        }
+    }
+
+    protected virtual void Awake()
+    {
+        if (_instance == null)
+        {
+            _instance = this as T;
+            DontDestroyOnLoad(gameObject);
+        }
+        else if (_instance != this)
+        {
+            Destroy(gameObject);
         }
     }
 }

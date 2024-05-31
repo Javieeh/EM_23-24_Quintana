@@ -67,6 +67,12 @@ public class CarController : MonoBehaviour
 
     public void Awake()
     {
+       
+
+    }
+
+    public void OnGameStarted()
+    {
         _rigidbody = GetComponent<Rigidbody>();
 
         checkpointManager = FindObjectOfType<CheckpointManager>();
@@ -79,7 +85,6 @@ public class CarController : MonoBehaviour
         {
             Debug.LogError("LapTimeController not found in the scene.");
         }
-
     }
 
 

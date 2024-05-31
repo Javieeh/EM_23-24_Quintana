@@ -37,7 +37,7 @@ public class InputController : NetworkBehaviour
     {
         if (context.performed)
         {
-            car.Shoot();
+            //car.Shoot();
         }
     }
 }
