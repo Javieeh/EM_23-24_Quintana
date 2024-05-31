@@ -74,6 +74,7 @@ public class CarController : MonoBehaviour
     {
         _rigidbody = GetComponent<Rigidbody>();
 
+        /*
         checkpointManager = FindObjectOfType<CheckpointManager>();
         wrongWayText.gameObject.SetActive(false);
 
@@ -81,7 +82,7 @@ public class CarController : MonoBehaviour
         {
             Debug.LogError("CheckpointManager not found in the scene.");
         }
-
+        */
     }
 
 

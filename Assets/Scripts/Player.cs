@@ -14,6 +14,9 @@ public class Player : MonoBehaviour
     public int CurrentPosition { get; set; }
     public int CurrentLap { get; set; }
 
+    //Canvas
+
+
 
     //vida del coche
     public int life;
