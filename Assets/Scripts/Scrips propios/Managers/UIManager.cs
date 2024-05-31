@@ -40,7 +40,6 @@ public class UIManager : Singleton<UIManager>
     [SerializeField] private TextMeshProUGUI[] mapVoteTexts;
 
     [Header("SPEEDOMETER")]
-    [SerializeField] public static UIManager Instance;
     [SerializeField] public TextMeshProUGUI[] playerPosTexts;
     private Speedometer speedometer;
 

@@ -67,11 +67,14 @@ public class CarController : MonoBehaviour
 
     public void Awake()
     {
-       
 
     }
+    private void OnEnable()
+    {
+        OnGameStarted();
+    }
 
-    public void OnGameStarted()
+    private void OnGameStarted()
     {
         _rigidbody = GetComponent<Rigidbody>();
 
@@ -100,7 +103,7 @@ public class CarController : MonoBehaviour
 
     public void Update()
     {
-        //Speed = _rigidbody.velocity.magnitude;
+        Speed = _rigidbody.velocity.magnitude;
     }
 
 
@@ -219,9 +222,10 @@ public class CarController : MonoBehaviour
         Checkpoint checkpoint = other.GetComponent<Checkpoint>();
         if (checkpoint != null && checkpointManager != null)
         {
-            if (checkpoint.gameObject.name == "CheckPoint 0" && !validReset){
+            if (checkpoint.gameObject.name == "CheckPoint 0" && !validReset)
+            {
                 Debug.Log("No es valido, lo pongo true pa la proxima");
-                validReset = true;                
+                validReset = true;
             }
             checkpointManager.CheckpointReached(checkpoint);
         }
@@ -231,7 +235,7 @@ public class CarController : MonoBehaviour
         {
             checkpointManager.FinishLineReached();
             if (!validReset)
-            { 
+            {
                 // Si no es valido, NO hago nada                
             }
             if (validReset)
@@ -239,7 +243,7 @@ public class CarController : MonoBehaviour
                 Debug.Log("Reinicio");
                 lapTimeController.StartNewLap();
             };
-            
+
 
         }
 

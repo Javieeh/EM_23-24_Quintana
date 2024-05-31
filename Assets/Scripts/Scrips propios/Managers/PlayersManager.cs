@@ -180,6 +180,7 @@ public class PlayersManager : Singleton<PlayersManager>
                 Debug.Log($"Moving player {player.name} to position {startPositions[index].position}");
                 player.transform.position = startPositions[index].position;
                 player.transform.rotation = startPositions[index].rotation;
+                player.GetComponentInChildren<CarController>().enabled= true;
                 index++;
             }
             else
