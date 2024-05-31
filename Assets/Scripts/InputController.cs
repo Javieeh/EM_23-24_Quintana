@@ -9,7 +9,7 @@ public class InputController : MonoBehaviour
 
     private void Start()
     {
-        car = GetComponent<Player>().car.GetComponent<CarController>();
+        car = GetComponentInParent<Player>().car.GetComponent<CarController>();
     }
 
     public void OnMove(InputAction.CallbackContext context)

@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Globalization;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -15,11 +16,22 @@ public class Player : MonoBehaviour
     public int CurrentLap { get; set; }
 
     //Canvas
-
-
+    public bool isDie = false;
+    public bool destroyPlayer = false;
 
     //vida del coche
     public int life;
+
+    //Material
+    private Material originMaterial;
+    private Renderer originRender;
+
+    //id
+    public int id = 0;
+
+    //puntos
+    public int points;
+    public int numeroMuertes;
 
     //public override void OnNetworkSpawn()
     //{
@@ -46,16 +58,50 @@ public class Player : MonoBehaviour
     {
         //GameManager.Instance.currentRace.AddPlayer(this);
         life = 5;
+        id = 0;
+        
+        //render
+        originRender = this.GetComponentInChildren<Renderer>();
+        originMaterial = originRender.material;
+
+        //
+        points = 0;
+        numeroMuertes = 0;
+        isDie = false;
     }
 
     private void Update()
     {
-        if (life <= 0) // en caso de quedarse sin vida, destruimos
+        if (life <= 0 && isDie == false) // en caso de quedarse sin vida, destruimos
         {
             Debug.Log("jugador eliminado");
-
-            //destruimos
-            Destroy(gameObject);
+            numeroMuertes++;
+            isDieDie();
         }
+
+    }
+
+    public void isDieDie()
+    {
+        isDie = true;
+
+        //Quitamos tag para que no se pueda disparar mas
+        this.transform.tag = "Untagged";
+
+        //reajustamos material
+        originRender.material = originMaterial;
+
+
+        StartCoroutine(CountDown());
+    }
+
+    IEnumerator CountDown()
+    {
+        this.life = 5;
+        isDie = false;
+        yield return new WaitForSeconds(5);
+        //volvermos a establecer el tag
+        this.transform.tag = "Player";
+        
     }
 }

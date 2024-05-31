@@ -70,12 +70,14 @@ public class CarController : MonoBehaviour
 
     #region Unity Callbacks
 
+    public int id;
+
     public void Awake()
     {
         _rigidbody = GetComponent<Rigidbody>();
-
-        /*
-        checkpointManager = FindObjectOfType<CheckpointManager>();
+        id = this.GetComponentInParent<Player>().id;
+        
+        /*checkpointManager = FindObjectOfType<CheckpointManager>();
         wrongWayText.gameObject.SetActive(false);
 
         if (checkpointManager == null)
@@ -415,6 +417,8 @@ public class CarController : MonoBehaviour
     {
         // Instancia el proyectil en la posición y rotación del punto de origen
         GameObject projectile = Instantiate(projectilePrefab, projectileSpawn.position, projectileSpawn.rotation);
+
+        projectile.GetComponent<ProjectilCollision>().id = id;
 
         // Añade una fuerza al proyectil para que se mueva en la dirección del coche
         Rigidbody rb = projectile.GetComponent<Rigidbody>();

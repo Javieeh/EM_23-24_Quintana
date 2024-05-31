@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 
 public class ProjectilCollision : MonoBehaviour
@@ -8,6 +9,7 @@ public class ProjectilCollision : MonoBehaviour
 
     public Material hitMaterial;
     private float timeHit;
+    public int id;
 
     void Start()
     {
@@ -27,7 +29,22 @@ public class ProjectilCollision : MonoBehaviour
             Debug.Log("Dado");
 
             //cogemos el componente de la vida de nuestro player y la reducimos en 1
-            other.GetComponent<Player>().life--;
+            other.GetComponentInParent<Player>().life--;
+
+            //muerte jugador
+            
+            if (other.GetComponentInParent<Player>().isDie == true)
+            {
+                Player[] players = FindObjectsOfType<Player>();
+                foreach (Player player in players)
+                {
+                    if (player.gameObject.GetComponent<Player>().id == id)
+                    {
+                        player.points++;
+                    }
+                }
+
+            }
 
             //Realizamos un cambio de color muy breve para darle feeling a la partida
             // Cambiar el material del objeto del jugador
@@ -43,7 +60,7 @@ public class ProjectilCollision : MonoBehaviour
                 Debug.Log("Material hit: " + hitMaterial.name);
 
                 // Volver al material original después de materialDuration segundos
-                StartCoroutine(ResetMaterial(originalMaterial, playerRenderer, other.GetComponent<Player>().life, timeHit));
+                StartCoroutine(ResetMaterial(originalMaterial, playerRenderer, other.GetComponentInParent<Player>().life, timeHit));
             }
 
             //Destruimos la bala para que no siga impactando 0.01 segundos despues para que se pueda realizar la coroutina

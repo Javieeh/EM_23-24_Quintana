@@ -24,11 +24,11 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4757432882938981683}
   m_LocalRotation: {x: 0, y: 0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.0089998245, y: 0.076, z: -1.5500627}
-  m_LocalScale: {x: 1, y: 1, z: -1}
+  m_LocalPosition: {x: 0.0089998245, y: 0.425974, z: -1.38}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 803218756108236291}
+  m_Father: {fileID: 1809738940018298747}
   m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &7979524747744343342
@@ -43,9 +43,29 @@ PrefabInstance:
       propertyPath: m_Name
       value: CocheJimy
       objectReference: {fileID: 0}
+    - target: {fileID: 393337214992987132, guid: 8cb0f194315f5874797b12dac7f6cdfb, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1590956948002837882, guid: 8cb0f194315f5874797b12dac7f6cdfb, type: 3}
       propertyPath: GlobalObjectIdHash
       value: 3081631845
+      objectReference: {fileID: 0}
+    - target: {fileID: 2594088004677523847, guid: 8cb0f194315f5874797b12dac7f6cdfb, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3781101945983558861, guid: 8cb0f194315f5874797b12dac7f6cdfb, type: 3}
+      propertyPath: projectileSpeed
+      value: 80
+      objectReference: {fileID: 0}
+    - target: {fileID: 4279766540494030137, guid: 8cb0f194315f5874797b12dac7f6cdfb, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4762422823368464506, guid: 8cb0f194315f5874797b12dac7f6cdfb, type: 3}
+      propertyPath: GlobalObjectIdHash
+      value: 1648449089
       objectReference: {fileID: 0}
     - target: {fileID: 4924797707498807718, guid: 8cb0f194315f5874797b12dac7f6cdfb, type: 3}
       propertyPath: m_RootOrder
@@ -91,77 +111,59 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5961834247589863452, guid: 8cb0f194315f5874797b12dac7f6cdfb, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6074032836476556806, guid: 8cb0f194315f5874797b12dac7f6cdfb, type: 3}
       propertyPath: projectileSpeed
       value: 150
+      objectReference: {fileID: 0}
+    - target: {fileID: 6713029537301548803, guid: 8cb0f194315f5874797b12dac7f6cdfb, type: 3}
+      propertyPath: m_Name
+      value: CocheJimy
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 6864632071556581736, guid: 8cb0f194315f5874797b12dac7f6cdfb, type: 3}
     - {fileID: 1590956948002837882, guid: 8cb0f194315f5874797b12dac7f6cdfb, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects:
-    - targetCorrespondingSourceObject: {fileID: 7321001729711817517, guid: 8cb0f194315f5874797b12dac7f6cdfb, type: 3}
+    - targetCorrespondingSourceObject: {fileID: 8620325648218913365, guid: 8cb0f194315f5874797b12dac7f6cdfb, type: 3}
       insertIndex: -1
       addedObject: {fileID: 6849404503253271857}
     m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 197096284232748267, guid: 8cb0f194315f5874797b12dac7f6cdfb, type: 3}
+    - targetCorrespondingSourceObject: {fileID: 6713029537301548803, guid: 8cb0f194315f5874797b12dac7f6cdfb, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 2564967976959507631}
-    - targetCorrespondingSourceObject: {fileID: 197096284232748267, guid: 8cb0f194315f5874797b12dac7f6cdfb, type: 3}
+      addedObject: {fileID: 2073819227003670121}
+    - targetCorrespondingSourceObject: {fileID: 6713029537301548803, guid: 8cb0f194315f5874797b12dac7f6cdfb, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 8405522217705213941}
-    - targetCorrespondingSourceObject: {fileID: 197096284232748267, guid: 8cb0f194315f5874797b12dac7f6cdfb, type: 3}
+      addedObject: {fileID: 5846414171009758840}
+    - targetCorrespondingSourceObject: {fileID: 6713029537301548803, guid: 8cb0f194315f5874797b12dac7f6cdfb, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1366447830211058057}
+      addedObject: {fileID: 9008049344298017404}
   m_SourcePrefab: {fileID: 100100000, guid: 8cb0f194315f5874797b12dac7f6cdfb, type: 3}
---- !u!4 &803218756108236291 stripped
+--- !u!4 &1809738940018298747 stripped
 Transform:
-  m_CorrespondingSourceObject: {fileID: 7321001729711817517, guid: 8cb0f194315f5874797b12dac7f6cdfb, type: 3}
+  m_CorrespondingSourceObject: {fileID: 8620325648218913365, guid: 8cb0f194315f5874797b12dac7f6cdfb, type: 3}
   m_PrefabInstance: {fileID: 7979524747744343342}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &5967613231086777471 stripped
+--- !u!1 &3436721301700416599 stripped
 GameObject:
-  m_CorrespondingSourceObject: {fileID: 4354365004613697873, guid: 8cb0f194315f5874797b12dac7f6cdfb, type: 3}
+  m_CorrespondingSourceObject: {fileID: 4687500281483780473, guid: 8cb0f194315f5874797b12dac7f6cdfb, type: 3}
   m_PrefabInstance: {fileID: 7979524747744343342}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &7782446095694789061 stripped
+--- !u!1 &3717035084011616813 stripped
 GameObject:
-  m_CorrespondingSourceObject: {fileID: 197096284232748267, guid: 8cb0f194315f5874797b12dac7f6cdfb, type: 3}
+  m_CorrespondingSourceObject: {fileID: 6713029537301548803, guid: 8cb0f194315f5874797b12dac7f6cdfb, type: 3}
   m_PrefabInstance: {fileID: 7979524747744343342}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &2564967976959507631
+--- !u!114 &2073819227003670121
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7782446095694789061}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f8f33d44e8eda5b44ac5dc589caba408, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &8405522217705213941
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7782446095694789061}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a9cd46121dd4cb44fa09ed8d2673620a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  car: {fileID: 5967613231086777471}
-  life: 0
---- !u!114 &1366447830211058057
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7782446095694789061}
+  m_GameObject: {fileID: 3717035084011616813}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 62899f850307741f2a39c98a8b639597, type: 3}
@@ -182,7 +184,7 @@ MonoBehaviour:
   m_ActionEvents:
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 2564967976959507631}
+      - m_Target: {fileID: 9008049344298017404}
         m_TargetAssemblyTypeName: InputController, Assembly-CSharp
         m_MethodName: OnMove
         m_Mode: 0
@@ -198,7 +200,7 @@ MonoBehaviour:
     m_ActionName: Player/Move[/Keyboard/w,/Keyboard/upArrow,/Keyboard/s,/Keyboard/downArrow,/Keyboard/a,/Keyboard/leftArrow,/Keyboard/d,/Keyboard/rightArrow]
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 2564967976959507631}
+      - m_Target: {fileID: 9008049344298017404}
         m_TargetAssemblyTypeName: InputController, Assembly-CSharp
         m_MethodName: OnAttack
         m_Mode: 0
@@ -214,7 +216,7 @@ MonoBehaviour:
     m_ActionName: Player/Attack[/Mouse/leftButton]
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 2564967976959507631}
+      - m_Target: {fileID: 9008049344298017404}
         m_TargetAssemblyTypeName: InputController, Assembly-CSharp
         m_MethodName: OnBrake
         m_Mode: 0
@@ -273,3 +275,32 @@ MonoBehaviour:
   m_DefaultActionMap: Player
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
+--- !u!114 &5846414171009758840
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3717035084011616813}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a9cd46121dd4cb44fa09ed8d2673620a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  car: {fileID: 3436721301700416599}
+  isDie: 0
+  destroyPlayer: 0
+  life: 0
+  id: 1
+--- !u!114 &9008049344298017404
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3717035084011616813}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f8f33d44e8eda5b44ac5dc589caba408, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
