@@ -1,14 +1,16 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine.UI; // A�adir esta l�nea
 using UnityEngine;
+using Unity.Netcode;
+using UnityEngine.UI;
 
-public class CarController : MonoBehaviour
+public class CarController : NetworkBehaviour
 {
     #region Variables
 
-    [Header("Movement")] public List<AxleInfo> axleInfos;
+    [Header("Movement")]
+    public List<AxleInfo> axleInfos;
     [SerializeField] private float forwardMotorTorque = 100000;
     [SerializeField] private float backwardMotorTorque = 50000;
     [SerializeField] private float maxSteeringAngle = 15;
@@ -17,36 +19,29 @@ public class CarController : MonoBehaviour
     [SerializeField] private float topSpeed = 200f;
     [SerializeField] private float downForce = 100f;
     [SerializeField] private float slipLimit = 0.2f;
-    [SerializeField] private float penaltyTime = 1f; // Tiempo de penalizaci�n en segundos
+    [SerializeField] private float penaltyTime = 1f;
 
     private float CurrentRotation { get; set; }
-    public float InputAcceleration { get; set; }
-    public float InputSteering { get; set; }
-    public float InputBrake { get; set; }
-
-    //private PlayerInfo m_PlayerInfo;
+    public NetworkVariable<float> InputAcceleration = new NetworkVariable<float>();
+    public NetworkVariable<float> InputSteering = new NetworkVariable<float>();
+    public NetworkVariable<float> InputBrake = new NetworkVariable<float>();
 
     private Rigidbody _rigidbody;
     private float _steerHelper = 0.8f;
 
-    //Detecci�n de colisiones
     private bool isPenalized = false;
-    public Image fadeImage; // A�adir referencia a la imagen de fundido
-    private GameObject lastRoadSegment; // para calcular la posicion tras haberse producido la colisi�n
+    public Image fadeImage;
+    private GameObject lastRoadSegment;
     private RespawnInfo lastRespawnInfo;
 
-    //Direcci�n de carrera
     private CheckpointManager checkpointManager;
     private LapTimeController lapTimeController;
 
     public float _currentSpeed = 0;
-    // Variable auxiliar para no resetear el contador de la vuelta actual al comenzar la carrera
-    // Ya que comienzas detras de la meta y al avanzar se te resetearia
     private bool validReset = false;
 
     public int id;
 
-    //Proyectil
     public GameObject projectilePrefab;
     public Transform projectileSpawn;
     public float projectileSpeed;
@@ -59,8 +54,7 @@ public class CarController : MonoBehaviour
         {
             if (Math.Abs(_currentSpeed - value) < float.Epsilon) return;
             _currentSpeed = value;
-            if (OnSpeedChangeEvent != null)
-                OnSpeedChangeEvent(_currentSpeed);
+            OnSpeedChangeEvent?.Invoke(_currentSpeed);
         }
     }
 
@@ -74,10 +68,11 @@ public class CarController : MonoBehaviour
 
     public void Awake()
     {
-        id = this.GetComponentInParent<Player>().id;
+        id = GetComponentInParent<Player>().id;
         projectileLife = 5;
         projectileSpeed = 80;
     }
+
     private void OnEnable()
     {
         OnGameStarted();
@@ -99,7 +94,6 @@ public class CarController : MonoBehaviour
         }
     }
 
-
     public void SetLastRespawnInfo(RespawnInfo respawnInfo)
     {
         lastRespawnInfo = respawnInfo;
@@ -113,23 +107,24 @@ public class CarController : MonoBehaviour
     public void Update()
     {
         Speed = _rigidbody.velocity.magnitude;
-    }
 
+        if (IsOwner)
+        {
+            // Solo el propietario puede controlar el coche
+            InputSteering.Value = Mathf.Clamp(Input.GetAxis("Horizontal"), -1, 1);
+            InputAcceleration.Value = Mathf.Clamp(Input.GetAxis("Vertical"), -1, 1);
+            InputBrake.Value = Input.GetKey(KeyCode.Space) ? 1 : 0;
+        }
+    }
 
     public void FixedUpdate()
     {
-        // Detectar si el coche est� volcado o de canto
-        if (!isPenalized && IsCarInUnstablePosition())
-        {
-            StartCoroutine(ApplyPenalty());
+        if (!IsServer) return; // Asegurarse de que solo el servidor controle la física
 
-        }
-
-        InputSteering = Mathf.Clamp(InputSteering, -1, 1);
-        InputAcceleration = Mathf.Clamp(InputAcceleration, -1, 1);
-        InputBrake = Mathf.Clamp(InputBrake, 0, 1);
-
-        float steering = maxSteeringAngle * InputSteering;
+        // Actualizar el coche con las entradas del propietario
+        float steering = maxSteeringAngle * InputSteering.Value;
+        float acceleration = InputAcceleration.Value;
+        float brake = InputBrake.Value;
 
         foreach (AxleInfo axleInfo in axleInfos)
         {
@@ -141,7 +136,7 @@ public class CarController : MonoBehaviour
 
             if (axleInfo.motor)
             {
-                if (InputAcceleration > float.Epsilon)
+                if (acceleration > float.Epsilon)
                 {
                     axleInfo.leftWheel.motorTorque = forwardMotorTorque;
                     axleInfo.leftWheel.brakeTorque = 0;
@@ -149,7 +144,7 @@ public class CarController : MonoBehaviour
                     axleInfo.rightWheel.brakeTorque = 0;
                 }
 
-                if (InputAcceleration < -float.Epsilon)
+                if (acceleration < -float.Epsilon)
                 {
                     axleInfo.leftWheel.motorTorque = -backwardMotorTorque;
                     axleInfo.leftWheel.brakeTorque = 0;
@@ -157,7 +152,7 @@ public class CarController : MonoBehaviour
                     axleInfo.rightWheel.brakeTorque = 0;
                 }
 
-                if (Math.Abs(InputAcceleration) < float.Epsilon)
+                if (Math.Abs(acceleration) < float.Epsilon)
                 {
                     axleInfo.leftWheel.motorTorque = 0;
                     axleInfo.leftWheel.brakeTorque = engineBrake;
@@ -165,7 +160,7 @@ public class CarController : MonoBehaviour
                     axleInfo.rightWheel.brakeTorque = engineBrake;
                 }
 
-                if (InputBrake > 0)
+                if (brake > 0)
                 {
                     axleInfo.leftWheel.brakeTorque = footBrake;
                     axleInfo.rightWheel.brakeTorque = footBrake;
@@ -181,18 +176,16 @@ public class CarController : MonoBehaviour
         AddDownForce();
         TractionControl();
     }
+
     private bool IsCarInUnstablePosition()
     {
-        // Consideramos que el coche est� en una posici�n inestable si est� inclinado m�s de 45 grados en cualquier direcci�n
-        float angleThreshold = 0.7f; // Cosine of 45 degrees is approximately 0.7
+        float angleThreshold = 0.7f;
 
-        // Verificar si el coche est� "volcado" (upside down)
         if (Vector3.Dot(transform.up, Vector3.up) < -angleThreshold)
         {
             return true;
         }
 
-        // Verificar si el coche est� de lado (cualquiera de las dos direcciones laterales)
         if (Mathf.Abs(Vector3.Dot(transform.right, Vector3.up)) > angleThreshold)
         {
             return true;
@@ -201,7 +194,8 @@ public class CarController : MonoBehaviour
         return false;
     }
 
-    #region Colisiones y reaparicion
+    #region Colisiones y reaparición
+
     private void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.CompareTag("Obstacle") && !isPenalized)
@@ -219,7 +213,6 @@ public class CarController : MonoBehaviour
 
         if (other.CompareTag("Carretera"))
         {
-
             RespawnInfo respawnInfo = other.GetComponent<RespawnInfo>();
             if (respawnInfo != null)
             {
@@ -227,19 +220,17 @@ public class CarController : MonoBehaviour
             }
         }
 
-        // Comprobaci�n de checkpoints
         Checkpoint checkpoint = other.GetComponent<Checkpoint>();
         if (checkpoint != null && checkpointManager != null)
         {
             if (checkpoint.gameObject.name == "CheckPoint 0" && !validReset)
             {
-                Debug.Log("No es valido, lo pongo true pa la proxima");
+                Debug.Log("No es valido, lo pongo true para la próxima");
                 validReset = true;
             }
             checkpointManager.CheckpointReached(checkpoint);
         }
 
-        // Comprobaci�n de la l�nea de meta
         if (other.CompareTag("Finish") && checkpointManager != null)
         {
             checkpointManager.FinishLineReached();
@@ -251,12 +242,8 @@ public class CarController : MonoBehaviour
             {
                 Debug.Log("Reinicio");
                 lapTimeController.StartNewLap();
-            };
-
-
+            }
         }
-
-
     }
 
     private IEnumerator ApplyPenalty()
@@ -264,16 +251,15 @@ public class CarController : MonoBehaviour
         isPenalized = true;
         yield return StartCoroutine(FadeToBlack());
 
-        // Reposicionar el coche aqu�
         RespawnCar();
 
         yield return new WaitForSeconds(penaltyTime);
         yield return StartCoroutine(FadeToClear());
         isPenalized = false;
     }
+
     private IEnumerator FadeToBlack()
     {
-
         float elapsedTime = 0f;
         Color color = fadeImage.color;
 
@@ -309,7 +295,6 @@ public class CarController : MonoBehaviour
 
     private void RespawnCar()
     {
-
         Vector3 respawnPosition = lastRespawnInfo.respawnPoint.position;
         Quaternion respawnRotation = lastRespawnInfo.respawnPoint.rotation;
 
@@ -317,18 +302,12 @@ public class CarController : MonoBehaviour
         _rigidbody.rotation = respawnRotation;
         _rigidbody.velocity = Vector3.zero;
         _rigidbody.angularVelocity = Vector3.zero;
-
     }
-
-    #endregion
-
-
 
     #endregion
 
     #region Methods
 
-    // crude traction control that reduces the power to wheel if the car is wheel spinning too much
     private void TractionControl()
     {
         foreach (var axleInfo in axleInfos)
@@ -352,7 +331,6 @@ public class CarController : MonoBehaviour
         }
     }
 
-    // this is used to add more grip in relation to speed
     private void AddDownForce()
     {
         foreach (var axleInfo in axleInfos)
@@ -369,8 +347,6 @@ public class CarController : MonoBehaviour
             _rigidbody.velocity = topSpeed * _rigidbody.velocity.normalized;
     }
 
-    // finds the corresponding visual wheel
-    // correctly applies the transform
     public void ApplyLocalPositionToVisuals(WheelCollider col)
     {
         if (col.transform.childCount == 0)
@@ -397,11 +373,10 @@ public class CarController : MonoBehaviour
             foreach (var wh in wheelHit)
             {
                 if (wh.normal == Vector3.zero)
-                    return; // wheels arent on the ground so dont realign the rigidbody velocity
+                    return; // wheels aren't on the ground so don't realign the rigidbody velocity
             }
         }
 
-        // this if is needed to avoid gimbal lock problems that will make the car suddenly shift direction
         if (Mathf.Abs(CurrentRotation - transform.eulerAngles.y) < 10f)
         {
             var turnAdjust = (transform.eulerAngles.y - CurrentRotation) * _steerHelper;
@@ -434,3 +409,4 @@ public class CarController : MonoBehaviour
 
     #endregion
 }
+#endregion

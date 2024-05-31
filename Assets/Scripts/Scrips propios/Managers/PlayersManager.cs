@@ -26,6 +26,12 @@ public class PlayersManager : Singleton<PlayersManager>
         }
     }
 
+    protected override void Awake()
+    {
+        base.Awake();
+        DontDestroyOnLoad(gameObject);
+    }
+
     private void Start()
     {
         NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
@@ -139,7 +145,6 @@ public class PlayersManager : Singleton<PlayersManager>
     [ClientRpc]
     private void UpdateCountdownClientRpc(int timeRemaining)
     {
-        //UIManager_gameObject.GetComponent<UIManager>().UpdateCountdownText(timeRemaining);
         UIManager.Instance.UpdateCountdownText(timeRemaining);
     }
 
@@ -147,9 +152,6 @@ public class PlayersManager : Singleton<PlayersManager>
     {
         Debug.Log("Starting game...");
         LoadCircuitSceneClientRpc();
-
-        //PARTE RAFA
-        
     }
 
     [ClientRpc]
@@ -180,7 +182,7 @@ public class PlayersManager : Singleton<PlayersManager>
                 Debug.Log($"Moving player {player.name} to position {startPositions[index].position}");
                 player.transform.position = startPositions[index].position;
                 player.transform.rotation = startPositions[index].rotation;
-                player.GetComponentInChildren<CarController>().enabled= true;
+                player.GetComponentInChildren<CarController>().enabled = true;
                 index++;
             }
             else
@@ -190,6 +192,7 @@ public class PlayersManager : Singleton<PlayersManager>
             }
         }
     }
+
     public Transform GetStartPosition(ulong clientId)
     {
         int index = 0;
@@ -215,7 +218,6 @@ public class PlayersManager : Singleton<PlayersManager>
         }
         return startPositions;
     }
-
 
     private void Update()
     {

@@ -6,7 +6,6 @@ using UnityEngine.InputSystem;
 public class InputController : NetworkBehaviour
 {
     private CarController car;
-    
 
     private void Start()
     {
@@ -18,8 +17,8 @@ public class InputController : NetworkBehaviour
         if (IsOwner)
         {
             var input = context.ReadValue<Vector2>();
-            car.InputAcceleration = input.y;
-            car.InputSteering = input.x;
+            car.InputAcceleration.Value = input.y;
+            car.InputSteering.Value = input.x;
         }
     }
 
@@ -28,20 +27,15 @@ public class InputController : NetworkBehaviour
         if (IsOwner)
         {
             var input = context.ReadValue<float>();
-            car.InputBrake = input;
+            car.InputBrake.Value = input;
         }
-
     }
 
     public void OnAttack(InputAction.CallbackContext context)
     {
-        if (IsOwner)
+        if (IsOwner && context.performed)
         {
-            if (context.performed)
-            {
-                car.Shoot();
-            }
+            car.Shoot();
         }
-        
     }
 }
