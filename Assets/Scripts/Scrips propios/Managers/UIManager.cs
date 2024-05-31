@@ -32,6 +32,7 @@ public class UIManager : Singleton<UIManager>
     [SerializeField] private Button mapButton3;
     [SerializeField] private Button mapButton4;
     [SerializeField] private TextMeshProUGUI[] mapVoteTexts;
+
     private void Awake()
     {
         Cursor.visible = true;
@@ -123,6 +124,16 @@ public class UIManager : Singleton<UIManager>
         mapButton3.onClick.AddListener(() => VoteForMap(2));
         mapButton4.onClick.AddListener(() => VoteForMap(3));
     }
+
+    private void OnReadyButtonClicked()
+    {
+        PlayersManager playersManager = FindObjectOfType<PlayersManager>();
+        if (playersManager != null)
+        {
+            playersManager.NotifyReadyServerRpc();
+        }
+    }
+
     private void VoteForMap(int mapIndex)
     {
         if (NetworkManager.Singleton.IsClient)

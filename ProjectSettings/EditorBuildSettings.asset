@@ -5,16 +5,19 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Assets/_Scenes/MainMenu.unity
     guid: e255add8f84314f4f9d3ee813cef5f8d
   - enabled: 1
     path: Assets/_Scenes/Escenas propias/Data_player.unity
     guid: 9568d9c7103057a429e2904e08765ccf
-  - enabled: 1
+  - enabled: 0
     path: Assets/_Scenes/Escenas propias/Emparejamiento.unity
     guid: a47e6ae3a40faee46b0dde2816f230d4
-  - enabled: 1
+  - enabled: 0
     path: Assets/_Scenes/Practica.unity
     guid: d6e2aa16639489942a57f101bec7ad1e
+  - enabled: 1
+    path: Assets/_Scenes/Escenas propias/Circuitos/Nascar.unity
+    guid: 9fc0d4010bbf28b4594072e72b8655ab
   m_configObjects: {}

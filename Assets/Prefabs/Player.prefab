@@ -498,6 +498,14 @@ MonoBehaviour:
   topSpeed: 200
   downForce: 350
   slipLimit: 0.2
+  penaltyTime: 1
+  fadeImage: {fileID: 0}
+  wrongWayText: {fileID: 0}
+  _currentSpeed: 0
+  projectileSpawn: {fileID: 0}
+  projectilePrefab: {fileID: 0}
+  projectileSpeed: 20
+  projectileLife: 5
 --- !u!65 &5509599731781151662
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -720,6 +728,7 @@ GameObject:
   - component: {fileID: 4279766540494030137}
   - component: {fileID: 5961834247589863452}
   - component: {fileID: 2594088004677523847}
+  - component: {fileID: 2799481197231600460}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -755,7 +764,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 1880004868
+  GlobalObjectIdHash: 1540069040
   InScenePlacedSourceGlobalObjectIdHash: 0
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
@@ -819,6 +828,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3982ad26c85bee0419062a3a59f77308, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &2799481197231600460
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6713029537301548803}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c9ddfb85f00da66429c2f53de6bf06a1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  carName: 
+  carColor: {r: 0, g: 0, b: 0, a: 0}
 --- !u!1 &7111235978746365882
 GameObject:
   m_ObjectHideFlags: 0

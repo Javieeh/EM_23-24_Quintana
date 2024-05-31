@@ -8,6 +8,7 @@ TagManager:
   - Cesped
   - Carretera
   - Arena
+  - GamePlaceholder
   layers:
   - Default
   - TransparentFX

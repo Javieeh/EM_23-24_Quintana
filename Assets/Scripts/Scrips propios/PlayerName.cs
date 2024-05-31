@@ -21,6 +21,9 @@ public class PlayerName : NetworkBehaviour
         {
             SetName("Player" + NetworkManager.Singleton.LocalClientId); // Establece un nombre inicial
         }
+
+        // Actualiza el nombre visualmente al inicio
+        OnNameChanged(playerName.Value, playerName.Value);
     }
 
     private void OnDestroy()
@@ -51,5 +54,10 @@ public class PlayerName : NetworkBehaviour
         {
             SetNameServerRpc(new NetworkString { info = new Unity.Collections.FixedString32Bytes(newName) });
         }
+    }
+
+    public string GetName()
+    {
+        return playerName.Value.ToString();
     }
 }
