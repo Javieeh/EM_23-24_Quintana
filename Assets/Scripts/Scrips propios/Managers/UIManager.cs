@@ -9,6 +9,9 @@ using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
 {
+    public static UIManager Instance;
+    public TextMeshProUGUI[] playerPosTexts;
+    private Speedometer speedometer;
     [SerializeField] private Button startServerButton;
     [SerializeField] private Button startHostButton;
     [SerializeField] private Button startClientButton;
@@ -19,13 +22,22 @@ public class UIManager : MonoBehaviour
     private void Awake()
     {
         Cursor.visible = true;
+        Instance = this;
+        speedometer = FindObjectOfType<Speedometer>();
     }
 
     private void Update()
     {
         playersInGameText.text = $"Players in game: {PlayersManager.Instance.PlayersInGame}";
     }
-
+    public void UpdatePlayerPosition(string playerName, int pos)
+    {
+        // Actualizamos el texto correspondiente en la interfaz
+        if (pos - 1 < playerPosTexts.Length)
+        {
+            playerPosTexts[pos - 1].text = $"{pos}. {playerName}";
+        }
+    }
     // Start is called before the first frame update
     void Start()
     {
@@ -38,13 +50,25 @@ public class UIManager : MonoBehaviour
                 PlayersManager playerManager = new PlayersManager();
                 if (playerManager != null)
                 {
-                    // Llamar al método SpawnPlayer de PlayersManager con el índice del placeholder
+                    // Llamar al mï¿½todo SpawnPlayer de PlayersManager con el ï¿½ndice del placeholder
                     playerManager.SpawnPlayer(NetworkManager.Singleton.LocalClientId); // Por ejemplo, el primer placeholder
                 }
                 else
                 {
                     Debug.LogError("PlayersManager instance is null.");
                 }
+                /*// CarController
+                CarController[] carControllers = FindObjectsOfType<CarController>();
+
+                foreach (CarController carController in carControllers)
+                {
+                    NetworkObject networkObject = carController.gameObject.GetComponentInParent<NetworkObject>();
+                    if (networkObject.IsOwner && networkObject != null)
+                    {
+                        speedometer._carController = carController;
+                        speedometer._target = speedometer._carController.gameObject.GetComponent<Rigidbody>();
+                    }
+                }*/
             }
             else
             {
@@ -84,5 +108,5 @@ public class UIManager : MonoBehaviour
 
 }
 
-    
+
 

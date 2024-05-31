@@ -1,27 +1,35 @@
 using System;
 using UnityEngine;
+using Unity.Netcode;
 using UnityEngine.InputSystem;
 
-public class InputController : MonoBehaviour
+public class InputController : NetworkBehaviour
 {
     private CarController car;
 
     private void Start()
     {
-        car = GetComponent<Player>().car.GetComponent<CarController>();
+        car = GetComponentInChildren<CarController>();
     }
 
     public void OnMove(InputAction.CallbackContext context)
     {
-        var input = context.ReadValue<Vector2>();
-        car.InputAcceleration = input.y;
-        car.InputSteering = input.x;
+        if (IsOwner)
+        {
+            var input = context.ReadValue<Vector2>();
+            car.InputAcceleration = input.y;
+            car.InputSteering = input.x;
+        }
     }
 
     public void OnBrake(InputAction.CallbackContext context)
     {
-        var input = context.ReadValue<float>();
-        car.InputBrake = input;
+        if (IsOwner)
+        {
+            var input = context.ReadValue<float>();
+            car.InputBrake = input;
+        }
+
     }
 
     public void OnAttack(InputAction.CallbackContext context)

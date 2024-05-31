@@ -1,11 +1,12 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using Unity.Netcode;
 
 public class Speedometer : MonoBehaviour
 {
-    public Rigidbody target;
-    public CarController carController; // Referencia al coche, para obtener su velocidad actual    
+    public Rigidbody _target;
+    public CarController _carController; // Referencia al coche, para obtener su velocidad actual    
     public float maxSpeed = 0.0f; // La velocidad máxima en km/h
 
     public float minSpeedArrowAngle;
@@ -16,9 +17,14 @@ public class Speedometer : MonoBehaviour
     public RectTransform arrow; // La flecha del velocimetro
 
     private float speed = 0.0f;
-    private void Update()
+
+    private void Start() 
     {
-        speed = carController._currentSpeed * 3.6f; // Multiplicamos por 3.6 para obtener la velocidad en Km/h
+       
+    }
+    private void Update()
+    {    
+        speed = _carController._currentSpeed * 3.6f; // Multiplicamos por 3.6 para obtener la velocidad en Km/h
 
         if (speedLabel != null)
             speedLabel.text = ((int)speed) + " km/h";

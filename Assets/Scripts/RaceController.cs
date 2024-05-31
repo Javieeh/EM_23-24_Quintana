@@ -1,14 +1,17 @@
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.Networking;
 
-public class RaceController : MonoBehaviour
+public class RaceController : NetworkBehaviour
 {
+    public static RaceController Instance;
     public int numPlayers;
 
     private readonly List<Player> _players = new(4);
     private CircuitController _circuitController;
     private GameObject[] _debuggingSpheres;
-
+    
     private void Start()
     {
         if (_circuitController == null) _circuitController = GetComponent<CircuitController>();
@@ -32,6 +35,10 @@ public class RaceController : MonoBehaviour
     public void AddPlayer(Player player)
     {
         _players.Add(player);
+    }
+    public void RemovePlayer(Player player)
+    {
+        _players.Remove(player);
     }
 
     private class PlayerInfoComparer : Comparer<Player>
@@ -68,6 +75,12 @@ public class RaceController : MonoBehaviour
         {
             myRaceOrder += player.Name + " ";
         }
+        for (int i = 0; i < _players.Count; i++){
+            Player player = _players[i];
+            myRaceOrder += player.Name + " ";
+            //Actualizamos la UI
+            UIManager.Instance.UpdatePlayerPosition(player.Name, i+1);
+        }
 
         Debug.Log("Race order: " + myRaceOrder);
     }
@@ -97,4 +110,5 @@ public class RaceController : MonoBehaviour
 
         return minArcL;
     }
+    
 }
