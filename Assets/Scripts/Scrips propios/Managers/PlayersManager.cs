@@ -3,15 +3,17 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PlayersManager : Singleton<PlayersManager>
 {
     [SerializeField]
-    private Transform[] placeholders; // Array de posiciones para los jugadores
+    private Transform[] placeholders; // Array de posiciones para los jugadores en el lobby
 
     private NetworkVariable<int> playersInGame = new NetworkVariable<int>();
     private int nextPlaceholderIndex = 0; // Índice para el siguiente placeholder disponible
     private int readyPlayersCount = 0; // Conteo de jugadores listos
+    private Dictionary<ulong, GameObject> spawnedPlayers = new Dictionary<ulong, GameObject>();
 
     [SerializeField] private GameObject prefab;
     [SerializeField] private int countdownTime = 3; // Tiempo de cuenta atrás en segundos
@@ -36,7 +38,10 @@ public class PlayersManager : Singleton<PlayersManager>
         {
             Debug.Log("Someone connected...");
             playersInGame.Value++;
-            SpawnPlayer(clientId, "Player" + clientId); // Asignar un nombre inicial basado en el ID del cliente
+            if (!spawnedPlayers.ContainsKey(clientId))
+            {
+                SpawnPlayer(clientId, "Player" + clientId); // Asignar un nombre inicial basado en el ID del cliente
+            }
         }
     }
 
@@ -91,6 +96,12 @@ public class PlayersManager : Singleton<PlayersManager>
             playerNameComponent.SetName(playerName);
         }
 
+        // Evitar que el jugador se destruya al cargar una nueva escena
+        DontDestroyOnLoad(player);
+
+        // Añadir el jugador al diccionario para evitar re-instantanciación
+        spawnedPlayers.Add(clientId, player);
+
         nextPlaceholderIndex++;
     }
 
@@ -135,7 +146,29 @@ public class PlayersManager : Singleton<PlayersManager>
     private void StartGame()
     {
         Debug.Log("Starting game...");
-        // Aquí puedes añadir la lógica para iniciar la partida
+        LoadCircuitSceneClientRpc();
+    }
+
+    [ClientRpc]
+    private void LoadCircuitSceneClientRpc()
+    {
+        StartCoroutine(LoadCircuitScene());
+    }
+
+    private IEnumerator LoadCircuitScene()
+    {
+        // Cargar la escena del circuito
+        SceneManager.LoadScene("Nascar");
+
+        // Esperar a que la escena se cargue
+        yield return new WaitForSeconds(1f);
+
+        // Mover a los jugadores a una posición específica (0, 0, 0) en la nueva escena
+        foreach (var player in spawnedPlayers.Values)
+        {
+            player.transform.position = new Vector3(7, 3, - 71); //Vector3.zero;
+            player.transform.rotation = Quaternion.identity;
+        }
     }
 
     private void Update()
@@ -144,10 +177,7 @@ public class PlayersManager : Singleton<PlayersManager>
     }
 }
 
-
-
-public class Singleton<T> : NetworkBehaviour
-    where T : Component
+public class Singleton<T> : NetworkBehaviour where T : Component
 {
     private static T _instance;
 
@@ -160,9 +190,9 @@ public class Singleton<T> : NetworkBehaviour
                 var objs = FindObjectsOfType(typeof(T)) as T[];
                 if (objs.Length > 0)
                 {
-                    _instance= objs[0];
+                    _instance = objs[0];
                 }
-                if (objs.Length>1)
+                if (objs.Length > 1)
                 {
                     Debug.LogError("There is more than one " + typeof(T).Name + " in the scene.");
                 }
