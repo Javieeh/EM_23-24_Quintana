@@ -24,12 +24,26 @@ public class Speedometer : MonoBehaviour
     }
     private void Update()
     {    
-        //speed = _carController._currentSpeed * 3.6f; // Multiplicamos por 3.6 para obtener la velocidad en Km/h
+        
+    }
 
-        //if (speedLabel != null)
-        //    speedLabel.text = ((int)speed) + " km/h";
-        //if (arrow != null)
-        //    arrow.localEulerAngles =
-        //        new Vector3(0, 0, Mathf.Lerp(minSpeedArrowAngle, maxSpeedArrowAngle, speed / maxSpeed));
+    private void OnEnable()
+    {
+        CarController[] carControllers = FindObjectsOfType<CarController>();
+        Rigidbody[] rigidBodies = FindObjectsOfType<Rigidbody>();
+        foreach (CarController carController in carControllers)
+        {
+            if (carController.gameObject.GetComponentInParent<NetworkObject>().IsOwner)
+            {
+                _carController = carController;
+            }
+        }
+        foreach (Rigidbody rigidbody in rigidBodies)
+        {
+            if (rigidbody.gameObject.GetComponentInParent<NetworkObject>().IsOwner)
+            {
+                _target = rigidbody;
+            }
+        }
     }
 }

@@ -77,10 +77,17 @@ public class CarController : MonoBehaviour
         id = this.GetComponentInParent<Player>().id;
         projectileLife = 5;
         projectileSpeed = 80;
+
+        //OnEnable
+        Debug.Log("hola");
+        Speedometer speedometer = FindObjectOfType<Speedometer>();
+        speedometer.enabled = true;
     }
     private void OnEnable()
     {
         OnGameStarted();
+
+        
     }
 
     private void OnGameStarted()
