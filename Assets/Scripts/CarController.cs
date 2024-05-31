@@ -100,7 +100,7 @@ public class CarController : MonoBehaviour
 
     public void Update()
     {
-        Speed = _rigidbody.velocity.magnitude;
+        //Speed = _rigidbody.velocity.magnitude;
     }
 
 
