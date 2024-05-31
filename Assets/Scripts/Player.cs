@@ -86,7 +86,7 @@ public class Player : MonoBehaviour
         isDie = true;
 
         //Quitamos tag para que no se pueda disparar mas
-        this.transform.tag = "Untagged";
+        this.transform.GetChild(0).transform.tag = "Untagged";
 
         //reajustamos material
         originRender.material = originMaterial;
@@ -101,7 +101,8 @@ public class Player : MonoBehaviour
         isDie = false;
         yield return new WaitForSeconds(5);
         //volvermos a establecer el tag
-        this.transform.tag = "Player";
+        Debug.Log("cooldown...");
+        this.transform.GetChild(0).transform.tag = "Player";
         
     }
 }
