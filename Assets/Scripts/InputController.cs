@@ -6,6 +6,7 @@ using UnityEngine.InputSystem;
 public class InputController : NetworkBehaviour
 {
     private CarController car;
+    
 
     private void Start()
     {
@@ -34,5 +35,9 @@ public class InputController : NetworkBehaviour
 
     public void OnAttack(InputAction.CallbackContext context)
     {
+        if (context.performed)
+        {
+            car.Shoot();
+        }
     }
 }
