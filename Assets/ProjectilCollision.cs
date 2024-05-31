@@ -8,6 +8,7 @@ public class ProjectilCollision : MonoBehaviour
 
     public Material hitMaterial;
     private float timeHit;
+    public int id;
 
     void Start()
     {
@@ -27,7 +28,7 @@ public class ProjectilCollision : MonoBehaviour
             Debug.Log("Dado");
 
             //cogemos el componente de la vida de nuestro player y la reducimos en 1
-            other.GetComponent<Player>().life--;
+            other.GetComponentInParent<Player>().life--;
 
             //Realizamos un cambio de color muy breve para darle feeling a la partida
             // Cambiar el material del objeto del jugador

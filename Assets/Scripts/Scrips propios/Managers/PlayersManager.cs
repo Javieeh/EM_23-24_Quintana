@@ -161,7 +161,7 @@ public class PlayersManager : Singleton<PlayersManager>
     private IEnumerator LoadCircuitScene()
     {
         // Cargar la escena del circuito
-        SceneManager.LoadScene("Nascar");
+        SceneManager.LoadScene("NascarC");
 
         // Esperar a que la escena se cargue
         yield return new WaitForSeconds(1f);

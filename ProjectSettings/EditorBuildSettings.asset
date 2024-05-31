@@ -14,4 +14,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/_Scenes/Escenas propias/Circuitos/Nascar.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab
+  - enabled: 1
+    path: Assets/_Scenes/Escenas propias/Combate/NascarC.unity
+    guid: b1543fff788da5245b27e3462e6c848f
   m_configObjects: {}

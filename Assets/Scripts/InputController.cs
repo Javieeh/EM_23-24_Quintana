@@ -35,9 +35,13 @@ public class InputController : NetworkBehaviour
 
     public void OnAttack(InputAction.CallbackContext context)
     {
-        if (context.performed)
+        if (IsOwner)
         {
-            //car.Shoot();
+            if (context.performed)
+            {
+                car.Shoot();
+            }
         }
+        
     }
 }
