@@ -20,7 +20,7 @@ public class CameraManager : Singleton<CameraManager>
             ulong localClientId = NetworkManager.Singleton.LocalClient.ClientId;
             if (PlayersManager.Instance.TryGetPlayer(localClientId, out GameObject localPlayer))
             {
-                SetPlayer(localPlayer.transform.GetChild(0));
+                //SetPlayer(localPlayer.transform.GetChild(0));
             }
         }
     }
