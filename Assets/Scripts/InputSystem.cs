@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.Serialization;
 
 public class InputSystem : MonoBehaviour
 {
@@ -28,6 +27,7 @@ public class InputSystem : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
+            DontDestroyOnLoad(gameObject);
         }
         else
         {
@@ -43,6 +43,11 @@ public class InputSystem : MonoBehaviour
     private void SetPlayer(Player player)
     {
         InputController input = player.GetComponent<InputController>();
+        if (input == null)
+        {
+            Debug.LogError("InputController no encontrado en el Player.");
+            return;
+        }
 
         Move.performed += input.OnMove;
         Move.Enable();
@@ -50,7 +55,7 @@ public class InputSystem : MonoBehaviour
         Brake.performed += input.OnBrake;
         Brake.Enable();
 
-        Attack.performed += input.OnBrake;
+        Attack.performed += input.OnAttack; // Corregido para asignar OnAttack
         Attack.Enable();
     }
 }

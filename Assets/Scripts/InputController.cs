@@ -9,7 +9,11 @@ public class InputController : NetworkBehaviour
 
     private void Start()
     {
-        car = GetComponentInChildren<CarController>();
+        car = GetComponentInParent<CarController>();
+        if (car == null)
+        {
+            Debug.LogError("CarController no encontrado en el objeto padre.");
+        }
     }
 
     public void OnMove(InputAction.CallbackContext context)
@@ -17,8 +21,8 @@ public class InputController : NetworkBehaviour
         if (IsOwner)
         {
             var input = context.ReadValue<Vector2>();
-            car.InputAcceleration.Value = input.y;
-            car.InputSteering.Value = input.x;
+            Debug.Log($"Cliente OnMove - Acceleration: {input.y}, Steering: {input.x}");
+            SubmitMoveInputServerRpc(input.y, input.x);
         }
     }
 
@@ -27,8 +31,8 @@ public class InputController : NetworkBehaviour
         if (IsOwner)
         {
             var input = context.ReadValue<float>();
-            car.InputBrake.Value = input;
-
+            Debug.Log($"Cliente OnBrake - Brake: {input}");
+            SubmitBrakeInputServerRpc(input);
         }
     }
 
@@ -37,6 +41,27 @@ public class InputController : NetworkBehaviour
         if (IsOwner && context.performed)
         {
             car.Shoot();
+        }
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void SubmitMoveInputServerRpc(float acceleration, float steering)
+    {
+        Debug.Log($"Servidor SubmitMoveInputServerRpc - Acceleration: {acceleration}, Steering: {steering}");
+        if (car != null && car.IsServer)
+        {
+            car.InputAcceleration.Value = acceleration;
+            car.InputSteering.Value = steering;
+        }
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void SubmitBrakeInputServerRpc(float brake)
+    {
+        Debug.Log($"Servidor SubmitBrakeInputServerRpc - Brake: {brake}");
+        if (car != null && car.IsServer)
+        {
+            car.InputBrake.Value = brake;
         }
     }
 }

@@ -22,9 +22,9 @@ public class CarController : NetworkBehaviour
     [SerializeField] private float penaltyTime = 1f;
 
     private float CurrentRotation { get; set; }
-    public NetworkVariable<float> InputAcceleration = new NetworkVariable<float>(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
-    public NetworkVariable<float> InputSteering = new NetworkVariable<float>(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
-    public NetworkVariable<float> InputBrake = new NetworkVariable<float>(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    public NetworkVariable<float> InputAcceleration = new NetworkVariable<float>();
+    public NetworkVariable<float> InputSteering = new NetworkVariable<float>();
+    public NetworkVariable<float> InputBrake = new NetworkVariable<float>();
 
     private Rigidbody _rigidbody;
     private float _steerHelper = 0.8f;
@@ -71,70 +71,119 @@ public class CarController : NetworkBehaviour
         id = GetComponentInParent<Player>().id;
         projectileLife = 5;
         projectileSpeed = 80;
+
+        _rigidbody = GetComponentInChildren<Rigidbody>();
+        if (_rigidbody == null)
+        {
+            Debug.LogError("No Rigidbody found in children of Car.");
+        }
     }
+
+    //private void Start()
+    //{
+    //    NetworkObject networkObject = GetComponent<NetworkObject>();
+    //    if (networkObject != null)
+    //    {
+    //        Debug.Log("NetworkObject OwnerClientId: " + networkObject.OwnerClientId);
+    //        Debug.Log("IsOwner: " + IsOwner);
+    //        Debug.Log("IsLocalPlayer: " + IsLocalPlayer);
+    //    }
+    //    else
+    //    {
+    //        Debug.LogError("NetworkObject no encontrado.");
+    //    }
+    //}
 
     private void OnEnable()
     {
+        Debug.Log("OnEnable llamado en " + gameObject.name);
+
+        NetworkObject networkObject = GetComponentInParent<NetworkObject>();
+        if (networkObject != null)
+        {
+            Debug.Log("NetworkObject encontrado en " + gameObject.name + " con NetworkObjectId: " + networkObject.NetworkObjectId);
+        }
+        else
+        {
+            Debug.LogError("NetworkObject no encontrado en el objeto padre de " + gameObject.name);
+        }
+
+        if (NetworkManager.Singleton.IsClient)
+        {
+            Debug.Log("Este es un cliente.");
+        }
+        if (NetworkManager.Singleton.IsServer)
+        {
+            Debug.Log("Este es un servidor.");
+        }
+
         OnGameStarted();
+        StartCoroutine(ReattemptFindComponents());
     }
 
-    private void OnGameStarted()
+    public override void OnNetworkSpawn()
     {
-        _rigidbody = GetComponent<Rigidbody>();
+        base.OnNetworkSpawn();
+        Debug.Log("OnNetworkSpawn llamado.");
 
-        checkpointManager = FindObjectOfType<CheckpointManager>();
-        if (checkpointManager == null)
+        if (IsServer)
         {
-            Debug.LogError("CheckpointManager not found in the scene.");
+            InputSteering.Value = 0f;
+            InputAcceleration.Value = 0f;
+            InputBrake.Value = 0f;
         }
-        lapTimeController = FindObjectOfType<LapTimeController>();
-        if (lapTimeController == null)
+
+        if (IsClient)
         {
-            Debug.LogError("LapTimeController not found in the scene.");
+            Debug.Log("Cliente spawneado con NetworkObjectId: " + NetworkObjectId);
         }
-    }
-
-    public void SetLastRespawnInfo(RespawnInfo respawnInfo)
-    {
-        lastRespawnInfo = respawnInfo;
-    }
-
-    public void SetLastRoadSegment(GameObject roadSegment)
-    {
-        lastRoadSegment = roadSegment;
     }
 
     public void Update()
     {
         Speed = _rigidbody.velocity.magnitude;
 
-        if (IsOwner)
+        if (IsOwner && IsSpawned && NetworkManager.Singleton.IsClient)
         {
-            // Solo el propietario puede controlar el coche
             float steeringInput = Mathf.Clamp(Input.GetAxis("Horizontal"), -1, 1);
             float accelerationInput = Mathf.Clamp(Input.GetAxis("Vertical"), -1, 1);
             float brakeInput = Input.GetKey(KeyCode.Space) ? 1 : 0;
 
+            Debug.Log("Enviando inputs al servidor: " + NetworkManager.LocalClientId);
             SubmitInputsServerRpc(steeringInput, accelerationInput, brakeInput);
+        }
+        else
+        {
+            Debug.Log("No es propietario o no está spawneado o no es cliente: " + NetworkManager.LocalClientId);
         }
     }
 
-    [ServerRpc]
+    [ServerRpc(RequireOwnership = false)]
     private void SubmitInputsServerRpc(float steering, float acceleration, float brake)
     {
-        InputSteering.Value = steering;
-        InputAcceleration.Value = acceleration;
-        InputBrake.Value = brake;
+        Debug.Log("SubmitInputsServerRpc llamado en el servidor.");
+        if (IsServer && IsSpawned)
+        {
+            Debug.Log("Servidor recibiendo inputs: " + NetworkManager.LocalClientId);
+            InputSteering.Value = steering;
+            InputAcceleration.Value = acceleration;
+            InputBrake.Value = brake;
+        }
+        else
+        {
+            Debug.LogWarning("Intento de escritura de cliente detectado en SubmitInputsServerRpc: " + NetworkManager.LocalClientId);
+        }
     }
 
     public void FixedUpdate()
     {
-        if (!IsServer) return; // Asegurarse de que solo el servidor controle la física
+        if (!IsServer || !IsSpawned) return;
 
-        // Actualizar el coche con las entradas del propietario
         float steering = maxSteeringAngle * InputSteering.Value;
         float acceleration = InputAcceleration.Value;
         float brake = InputBrake.Value;
+
+        Debug.Log($"FixedUpdate - Steering: {steering}, Acceleration: {acceleration}, Brake: {brake}");
 
         foreach (AxleInfo axleInfo in axleInfos)
         {
@@ -148,17 +197,17 @@ public class CarController : NetworkBehaviour
             {
                 if (acceleration > float.Epsilon)
                 {
-                    axleInfo.leftWheel.motorTorque = forwardMotorTorque;
+                    axleInfo.leftWheel.motorTorque = forwardMotorTorque * acceleration;
                     axleInfo.leftWheel.brakeTorque = 0;
-                    axleInfo.rightWheel.motorTorque = forwardMotorTorque;
+                    axleInfo.rightWheel.motorTorque = forwardMotorTorque * acceleration;
                     axleInfo.rightWheel.brakeTorque = 0;
                 }
 
                 if (acceleration < -float.Epsilon)
                 {
-                    axleInfo.leftWheel.motorTorque = -backwardMotorTorque;
+                    axleInfo.leftWheel.motorTorque = backwardMotorTorque * acceleration;
                     axleInfo.leftWheel.brakeTorque = 0;
-                    axleInfo.rightWheel.motorTorque = -backwardMotorTorque;
+                    axleInfo.rightWheel.motorTorque = backwardMotorTorque * acceleration;
                     axleInfo.rightWheel.brakeTorque = 0;
                 }
 
@@ -185,6 +234,63 @@ public class CarController : NetworkBehaviour
         SpeedLimiter();
         AddDownForce();
         TractionControl();
+    }
+
+    private IEnumerator ReattemptFindComponents()
+    {
+        while (checkpointManager == null || lapTimeController == null)
+        {
+            Debug.Log("Reintentando encontrar CheckpointManager y LapTimeController...");
+            FindRequiredComponents();
+            yield return new WaitForSeconds(1f);
+        }
+    }
+
+    private void OnGameStarted()
+    {
+        if (_rigidbody == null)
+        {
+            _rigidbody = GetComponentInChildren<Rigidbody>();
+            if (_rigidbody == null)
+            {
+                Debug.LogError("No Rigidbody found in children of Car.");
+            }
+        }
+
+        FindRequiredComponents();
+    }
+
+    private void FindRequiredComponents()
+    {
+        checkpointManager = FindObjectOfType<CheckpointManager>();
+        if (checkpointManager == null)
+        {
+            Debug.LogError("CheckpointManager not found in the scene.");
+        }
+        else
+        {
+            Debug.Log("CheckpointManager found.");
+        }
+
+        lapTimeController = FindObjectOfType<LapTimeController>();
+        if (lapTimeController == null)
+        {
+            Debug.LogError("LapTimeController not found in the scene.");
+        }
+        else
+        {
+            Debug.Log("LapTimeController found.");
+        }
+    }
+
+    public void SetLastRespawnInfo(RespawnInfo respawnInfo)
+    {
+        lastRespawnInfo = respawnInfo;
+    }
+
+    public void SetLastRoadSegment(GameObject roadSegment)
+    {
+        lastRoadSegment = roadSegment;
     }
 
     private bool IsCarInUnstablePosition()
@@ -399,21 +505,14 @@ public class CarController : NetworkBehaviour
 
     public void Shoot()
     {
-        // Instancia el proyectil en la posición y rotación del punto de origen
         GameObject projectile = Instantiate(projectilePrefab, projectileSpawn.position, projectileSpawn.rotation);
-
         projectile.GetComponent<ProjectilCollision>().id = id;
-
-        // Añade una fuerza al proyectil para que se mueva en la dirección del coche
         Rigidbody rb = projectile.GetComponent<Rigidbody>();
         if (rb != null)
         {
             rb.velocity = projectileSpawn.forward * projectileSpeed;
         }
-
-        // Destruye el proyectil después de projectileLifetime segundos
         Destroy(projectile, projectileLife);
-
         Debug.Log("Shooting from the car!");
     }
 
