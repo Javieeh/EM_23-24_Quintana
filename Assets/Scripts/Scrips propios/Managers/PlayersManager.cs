@@ -182,14 +182,24 @@ public class PlayersManager : Singleton<PlayersManager>
                 Debug.Log($"Moving player {player.name} to position {startPositions[index].position}");
                 player.transform.position = startPositions[index].position;
                 player.transform.rotation = startPositions[index].rotation;
-                player.GetComponentInChildren<CarController>().enabled = true;
-                player.GetComponent<PlayerCamera>().enabled = true;   
+                
                 index++;
             }
             else
             {
                 Debug.LogError("Not enough start positions for players.");
                 break;
+            }
+        }
+
+        GameObject[] players = GameObject.FindGameObjectsWithTag("NetworkPlayer");
+
+        foreach (var player in players)
+        {
+            if (player.GetComponent<NetworkObject>().IsOwner)
+            {
+                player.GetComponentInChildren<CarController>().enabled = true;
+                player.GetComponent<PlayerCamera>().enabled = true;
             }
         }
     }

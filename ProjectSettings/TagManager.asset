@@ -9,6 +9,8 @@ TagManager:
   - Carretera
   - Arena
   - StartPosition
+  - NetworkPlayer
+  - VirtualCamera
   layers:
   - Default
   - TransparentFX

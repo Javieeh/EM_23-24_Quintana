@@ -6,14 +6,16 @@ using UnityEngine;
 
 public class PlayerCamera : NetworkBehaviour
 {
+    private CinemachineVirtualCamera virtualCamera;
+     
+
     private void Start()
     {
+        virtualCamera = GameObject.FindGameObjectWithTag("VirtualCamera").GetComponent<CinemachineVirtualCamera>();
         Debug.Log("PlayerCamera de " + this.gameObject.name + " iniciada...");
-        if (IsOwner)
-        {
-            //Aqui da error object refenece, no esta bien instanciada la camara
-            Camera.main.GetComponent<CinemachineVirtualCamera>().LookAt = this.transform;
-            Camera.main.GetComponent<CinemachineVirtualCamera>().Follow = this.transform;
-        }
+        //Aqui da error object refenece, no esta bien instanciada la camara
+        virtualCamera.LookAt = this.transform.GetChild(0);
+        virtualCamera.Follow = this.transform.GetChild(0);
+
     }
 }

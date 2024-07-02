@@ -1,10 +1,12 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Unity.Netcode;
+using System.Collections.Generic;
 
 public class PlayerController : NetworkBehaviour
 {
     private Transform carTransform;
+    public GameObject playerPrefab;
 
     private void Start()
     {
@@ -16,6 +18,9 @@ public class PlayerController : NetworkBehaviour
         carTransform = transform.Find("car");
 
         DontDestroyOnLoad(gameObject);
+
+
+
     }
 
     private void OnDestroy()

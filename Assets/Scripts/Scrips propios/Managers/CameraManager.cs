@@ -10,7 +10,7 @@ public class CameraManager : Singleton<CameraManager>
 
     void Start()
     {
-        virtualCamera = GetComponent<CinemachineVirtualCamera>();
+        virtualCamera = GameObject.FindGameObjectWithTag("VirtualCamera").GetComponent<CinemachineVirtualCamera>();
     }
 
     void Update()
