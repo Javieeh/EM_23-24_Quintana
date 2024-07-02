@@ -72,7 +72,7 @@ public class CarController : NetworkBehaviour
         projectileLife = 5;
         projectileSpeed = 80;
 
-        _rigidbody = GetComponentInChildren<Rigidbody>();
+        _rigidbody = GetComponent<Rigidbody>();
         if (_rigidbody == null)
         {
             Debug.LogError("No Rigidbody found in children of Car.");
@@ -125,6 +125,12 @@ public class CarController : NetworkBehaviour
     {
         base.OnNetworkSpawn();
         Debug.Log("OnNetworkSpawn llamado.");
+
+        if (!enabled)
+        {
+            enabled = true;
+            Debug.Log("CarController activado en OnNetworkSpawn.");
+        }
 
         if (IsServer)
         {

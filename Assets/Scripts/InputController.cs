@@ -9,7 +9,7 @@ public class InputController : NetworkBehaviour
 
     private void Start()
     {
-        car = GetComponentInParent<CarController>();
+        car = GetComponentInChildren<CarController>();
         if (car == null)
         {
             Debug.LogError("CarController no encontrado en el objeto padre.");

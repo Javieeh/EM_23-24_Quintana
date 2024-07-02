@@ -200,7 +200,7 @@ public class PlayersManager : Singleton<PlayersManager>
             {
                 player.GetComponent<PlayerCamera>().enabled = true;
             }
-            player.GetComponent<CarController>().enabled = true;
+            player.GetComponentInChildren<CarController>().enabled = true;
         }
     }
 
