@@ -22,9 +22,9 @@ public class CarController : NetworkBehaviour
     [SerializeField] private float penaltyTime = 1f;
 
     private float CurrentRotation { get; set; }
-    public NetworkVariable<float> InputAcceleration = new NetworkVariable<float>();
-    public NetworkVariable<float> InputSteering = new NetworkVariable<float>();
-    public NetworkVariable<float> InputBrake = new NetworkVariable<float>();
+    public NetworkVariable<float> InputAcceleration = new NetworkVariable<float>(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    public NetworkVariable<float> InputSteering = new NetworkVariable<float>(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    public NetworkVariable<float> InputBrake = new NetworkVariable<float>(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
     private Rigidbody _rigidbody;
     private float _steerHelper = 0.8f;
@@ -111,10 +111,20 @@ public class CarController : NetworkBehaviour
         if (IsOwner)
         {
             // Solo el propietario puede controlar el coche
-            InputSteering.Value = Mathf.Clamp(Input.GetAxis("Horizontal"), -1, 1);
-            InputAcceleration.Value = Mathf.Clamp(Input.GetAxis("Vertical"), -1, 1);
-            InputBrake.Value = Input.GetKey(KeyCode.Space) ? 1 : 0;
+            float steeringInput = Mathf.Clamp(Input.GetAxis("Horizontal"), -1, 1);
+            float accelerationInput = Mathf.Clamp(Input.GetAxis("Vertical"), -1, 1);
+            float brakeInput = Input.GetKey(KeyCode.Space) ? 1 : 0;
+
+            SubmitInputsServerRpc(steeringInput, accelerationInput, brakeInput);
         }
+    }
+
+    [ServerRpc]
+    private void SubmitInputsServerRpc(float steering, float acceleration, float brake)
+    {
+        InputSteering.Value = steering;
+        InputAcceleration.Value = acceleration;
+        InputBrake.Value = brake;
     }
 
     public void FixedUpdate()
