@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -174,6 +175,7 @@ public class PlayersManager : Singleton<PlayersManager>
         Transform[] startPositions = GetStartPositions();
 
         // Mover a los jugadores a las posiciones iniciales en la nueva escena
+        //A este forEach solo accede el Host ya que spawnedPlayers no es una networkVariable
         int index = 0;
         foreach (var player in spawnedPlayers.Values)
         {
@@ -192,6 +194,7 @@ public class PlayersManager : Singleton<PlayersManager>
             }
         }
 
+        //Aqui acceden todos los clientes
         GameObject[] players = GameObject.FindGameObjectsWithTag("NetworkPlayer");
 
         foreach (var player in players)
@@ -202,6 +205,8 @@ public class PlayersManager : Singleton<PlayersManager>
             }
             player.GetComponentInChildren<CarController>().enabled = true;
         }
+
+        UpdatePlayerTexts(players);
     }
 
     public Transform GetStartPosition(ulong clientId)
@@ -228,6 +233,20 @@ public class PlayersManager : Singleton<PlayersManager>
             startPositions[i] = startObjects[i].transform;
         }
         return startPositions;
+    }
+
+    private void UpdatePlayerTexts(GameObject[] players)
+    {
+        TextMeshProUGUI position = GameObject.FindGameObjectWithTag("PositionText").GetComponent<TextMeshProUGUI>();
+        foreach (var player in players)
+        {
+            NetworkObject networkObject = player.GetComponent<NetworkObject>();
+
+            if (networkObject.IsOwner)
+            {
+                UIManager.Instance.InitPositionText((int) networkObject.OwnerClientId, PlayersInGame, position);
+            }
+        }
     }
 
     public bool TryGetPlayer(ulong clientId, out GameObject player)

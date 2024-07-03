@@ -11,6 +11,7 @@ TagManager:
   - StartPosition
   - NetworkPlayer
   - VirtualCamera
+  - PositionText
   layers:
   - Default
   - TransparentFX

@@ -40,7 +40,7 @@ public class UIManager : Singleton<UIManager>
     [SerializeField] private TextMeshProUGUI[] mapVoteTexts;
 
     [Header("SPEEDOMETER")]
-    [SerializeField] public TextMeshProUGUI[] playerPosTexts;
+    [SerializeField] public TextMeshProUGUI positions;
     private Speedometer speedometer;
 
     private void Awake()
@@ -53,12 +53,13 @@ public class UIManager : Singleton<UIManager>
     {
         playersInGameText.text = $"Players in game: {PlayersManager.Instance.PlayersInGame}";
     }
-    public void UpdatePlayerPosition(string playerName, int pos)
+
+    public void InitPositionText(int playerIndex, int totalPlayers, TextMeshProUGUI positionText)
     {
-        // Actualizamos el texto correspondiente en la interfaz
-        if (pos - 1 < playerPosTexts.Length)
+        positions = positionText;
+        if (playerIndex < totalPlayers)
         {
-            playerPosTexts[pos - 1].text = $"{pos}. {playerName}";
+            positions.text = $"{playerIndex + 1}/{totalPlayers}";
         }
     }
     // Start is called before the first frame update

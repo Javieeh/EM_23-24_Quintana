@@ -79,7 +79,7 @@ public class RaceController : NetworkBehaviour
             Player player = _players[i];
             myRaceOrder += player.Name + " ";
             //Actualizamos la UI
-            UIManager.Instance.UpdatePlayerPosition(player.Name, i+1);
+            //UIManager.Instance.UpdatePlayerPosition(player.Name, i+1);
         }
 
         Debug.Log("Race order: " + myRaceOrder);
