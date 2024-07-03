@@ -79,43 +79,19 @@ public class CarController : NetworkBehaviour
         }
     }
 
-    //private void Start()
-    //{
-    //    NetworkObject networkObject = GetComponent<NetworkObject>();
-    //    if (networkObject != null)
-    //    {
-    //        Debug.Log("NetworkObject OwnerClientId: " + networkObject.OwnerClientId);
-    //        Debug.Log("IsOwner: " + IsOwner);
-    //        Debug.Log("IsLocalPlayer: " + IsLocalPlayer);
-    //    }
-    //    else
-    //    {
-    //        Debug.LogError("NetworkObject no encontrado.");
-    //    }
-    //}
 
     private void OnEnable()
     {
-        Debug.Log("OnEnable llamado en " + gameObject.name);
+       
 
         NetworkObject networkObject = GetComponentInParent<NetworkObject>();
-        if (networkObject != null)
-        {
-            Debug.Log("NetworkObject encontrado en " + gameObject.name + " con NetworkObjectId: " + networkObject.NetworkObjectId);
-        }
-        else
+        if (networkObject == null)
         {
             Debug.LogError("NetworkObject no encontrado en el objeto padre de " + gameObject.name);
         }
+        
 
-        if (NetworkManager.Singleton.IsClient)
-        {
-            Debug.Log("Este es un cliente.");
-        }
-        if (NetworkManager.Singleton.IsServer)
-        {
-            Debug.Log("Este es un servidor.");
-        }
+       
 
         OnGameStarted();
         StartCoroutine(ReattemptFindComponents());
@@ -124,13 +100,13 @@ public class CarController : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
-        Debug.Log("OnNetworkSpawn llamado.");
+       
 
-        if (!enabled)
-        {
-            enabled = true;
-            Debug.Log("CarController activado en OnNetworkSpawn.");
-        }
+        //if (!enabled)
+        //{
+        //    enabled = true;
+        //    Debug.Log("CarController activado en OnNetworkSpawn.");
+        //}
 
         if (IsServer)
         {
@@ -139,10 +115,7 @@ public class CarController : NetworkBehaviour
             InputBrake.Value = 0f;
         }
 
-        if (IsClient)
-        {
-            Debug.Log("Cliente spawneado con NetworkObjectId: " + NetworkObjectId);
-        }
+        
     }
 
     public void Update()
@@ -155,22 +128,19 @@ public class CarController : NetworkBehaviour
             float accelerationInput = Mathf.Clamp(Input.GetAxis("Vertical"), -1, 1);
             float brakeInput = Input.GetKey(KeyCode.Space) ? 1 : 0;
 
-            Debug.Log("Enviando inputs al servidor: " + NetworkManager.LocalClientId);
+           
             SubmitInputsServerRpc(steeringInput, accelerationInput, brakeInput);
         }
-        else
-        {
-            Debug.Log("No es propietario o no está spawneado o no es cliente: " + NetworkManager.LocalClientId);
-        }
+        
     }
 
     [ServerRpc(RequireOwnership = false)]
     private void SubmitInputsServerRpc(float steering, float acceleration, float brake)
     {
-        Debug.Log("SubmitInputsServerRpc llamado en el servidor.");
+       
         if (IsServer && IsSpawned)
         {
-            Debug.Log("Servidor recibiendo inputs: " + NetworkManager.LocalClientId);
+            
             InputSteering.Value = steering;
             InputAcceleration.Value = acceleration;
             InputBrake.Value = brake;
@@ -189,7 +159,7 @@ public class CarController : NetworkBehaviour
         float acceleration = InputAcceleration.Value;
         float brake = InputBrake.Value;
 
-        Debug.Log($"FixedUpdate - Steering: {steering}, Acceleration: {acceleration}, Brake: {brake}");
+       
 
         foreach (AxleInfo axleInfo in axleInfos)
         {
@@ -246,7 +216,7 @@ public class CarController : NetworkBehaviour
     {
         while (checkpointManager == null || lapTimeController == null)
         {
-            Debug.Log("Reintentando encontrar CheckpointManager y LapTimeController...");
+          
             FindRequiredComponents();
             yield return new WaitForSeconds(1f);
         }
@@ -273,20 +243,14 @@ public class CarController : NetworkBehaviour
         {
             Debug.LogError("CheckpointManager not found in the scene.");
         }
-        else
-        {
-            Debug.Log("CheckpointManager found.");
-        }
+        
 
         lapTimeController = FindObjectOfType<LapTimeController>();
         if (lapTimeController == null)
         {
             Debug.LogError("LapTimeController not found in the scene.");
         }
-        else
-        {
-            Debug.Log("LapTimeController found.");
-        }
+       
     }
 
     public void SetLastRespawnInfo(RespawnInfo respawnInfo)
@@ -347,7 +311,7 @@ public class CarController : NetworkBehaviour
         {
             if (checkpoint.gameObject.name == "CheckPoint 0" && !validReset)
             {
-                Debug.Log("No es valido, lo pongo true para la próxima");
+               
                 validReset = true;
             }
             checkpointManager.CheckpointReached(checkpoint);
@@ -362,7 +326,7 @@ public class CarController : NetworkBehaviour
             }
             if (validReset)
             {
-                Debug.Log("Reinicio");
+                
                 lapTimeController.StartNewLap();
             }
         }
@@ -519,7 +483,7 @@ public class CarController : NetworkBehaviour
             rb.velocity = projectileSpawn.forward * projectileSpeed;
         }
         Destroy(projectile, projectileLife);
-        Debug.Log("Shooting from the car!");
+        
     }
 
     #endregion

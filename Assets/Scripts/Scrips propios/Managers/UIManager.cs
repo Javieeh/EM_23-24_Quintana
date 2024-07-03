@@ -9,8 +9,6 @@ using UnityEngine.UI;
 
 public class UIManager : Singleton<UIManager>
 {
-
-
     [Header("INITIAL MENU")]
     [SerializeField] private GameObject initialMenu;
     [SerializeField] private Button startServerButton;
@@ -46,13 +44,13 @@ public class UIManager : Singleton<UIManager>
     private void Awake()
     {
         Cursor.visible = true;
-
     }
 
     private void Update()
     {
         playersInGameText.text = $"Players in game: {PlayersManager.Instance.PlayersInGame}";
     }
+
     public void UpdatePlayerPosition(string playerName, int pos)
     {
         // Actualizamos el texto correspondiente en la interfaz
@@ -61,6 +59,7 @@ public class UIManager : Singleton<UIManager>
             playerPosTexts[pos - 1].text = $"{pos}. {playerName}";
         }
     }
+
     // Start is called before the first frame update
     void Start()
     {
@@ -77,6 +76,7 @@ public class UIManager : Singleton<UIManager>
             initialMenu.SetActive(false);
             selectionMenu.SetActive(true);
         });
+
         startServerButton.onClick.AddListener(() =>
         {
             if (NetworkManager.Singleton.StartServer())
@@ -89,8 +89,8 @@ public class UIManager : Singleton<UIManager>
             }
             initialMenu.SetActive(false);
             selectionMenu.SetActive(true);
-        }
-        );
+        });
+
         startClientButton.onClick.AddListener(() =>
         {
             if (NetworkManager.Singleton.StartClient())
@@ -103,8 +103,8 @@ public class UIManager : Singleton<UIManager>
             }
             initialMenu.SetActive(false);
             selectionMenu.SetActive(true);
-        }
-        );
+        });
+
         nextColorButton.onClick.AddListener(() =>
         {
             // Obtener el jugador local y cambiar su color
@@ -177,9 +177,4 @@ public class UIManager : Singleton<UIManager>
             countdownText.text = $"Game starts in: {timeRemaining} seconds";
         }
     }
-
-
 }
-
-
-

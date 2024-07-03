@@ -48,8 +48,20 @@ public class PlayersManager : Singleton<PlayersManager>
             {
                 SpawnPlayer(clientId, "Player" + clientId); // Asignar un nombre inicial basado en el ID del cliente
             }
+
+            // Enviar información de los jugadores actuales al nuevo cliente
+            foreach (var player in spawnedPlayers.Values)
+            {
+                var playerName = player.GetComponent<PlayerName>();
+                if (playerName != null)
+                {
+                    playerName.SendCurrentNameToClient(clientId);
+                }
+            }
         }
     }
+
+
 
     private void OnClientDisconnected(ulong clientId)
     {
@@ -95,7 +107,10 @@ public class PlayersManager : Singleton<PlayersManager>
         // Marca el objeto como perteneciente al jugador local y lo instancia en la red
         networkObject.SpawnAsPlayerObject(clientId, true);
 
-        // Asigna el nombre al jugador
+        // Añadir el jugador al diccionario para evitar re-instantanciación
+        spawnedPlayers.Add(clientId, player);
+
+        // Asigna el nombre al jugador utilizando SetName para sincronizar con todos los clientes
         var playerNameComponent = player.GetComponent<PlayerName>();
         if (playerNameComponent != null)
         {
@@ -104,9 +119,6 @@ public class PlayersManager : Singleton<PlayersManager>
 
         // Evitar que el jugador se destruya al cargar una nueva escena
         DontDestroyOnLoad(player);
-
-        // Añadir el jugador al diccionario para evitar re-instantanciación
-        spawnedPlayers.Add(clientId, player);
 
         nextPlaceholderIndex++;
     }
@@ -182,7 +194,7 @@ public class PlayersManager : Singleton<PlayersManager>
                 Debug.Log($"Moving player {player.name} to position {startPositions[index].position}");
                 player.transform.position = startPositions[index].position;
                 player.transform.rotation = startPositions[index].rotation;
-                
+
                 index++;
             }
             else
