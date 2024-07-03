@@ -127,20 +127,24 @@ public class PlayersManager : Singleton<PlayersManager>
 
         if (readyPlayersCount >= 2)
         {
-            StartCoroutine(StartCountdown());
+            int winningMapIndex = VotingManager.Instance.GetWinningMap(); //Cogemos el mapa ganador y lo pasamos como variable
+            StartCoroutine(StartCountdown(winningMapIndex));
+        }
+        if (readyPlayersCount >= 2)
+        {
+            
         }
     }
 
-    private IEnumerator StartCountdown()
+    private IEnumerator StartCountdown(int winningMapIndex)
     {
         for (int i = countdownTime; i > 0; i--)
         {
-            // Enviar el tiempo restante a los clientes
             UpdateCountdownClientRpc(i);
             yield return new WaitForSeconds(1f);
         }
 
-        StartGame();
+        StartGame(winningMapIndex);
     }
 
     [ClientRpc]
@@ -149,22 +153,34 @@ public class PlayersManager : Singleton<PlayersManager>
         UIManager.Instance.UpdateCountdownText(timeRemaining);
     }
 
-    private void StartGame()
+    private void StartGame(int mapIndex)
     {
-        Debug.Log("Starting game...");
-        LoadCircuitSceneClientRpc();
+        Debug.Log("Starting game with map index: " + mapIndex);
+        LoadCircuitSceneClientRpc(mapIndex);
     }
 
     [ClientRpc]
-    private void LoadCircuitSceneClientRpc()
+    private void LoadCircuitSceneClientRpc(int mapIndex)
     {
-        StartCoroutine(LoadCircuitScene());
+        StartCoroutine(LoadCircuitScene(mapIndex));
     }
 
-    private IEnumerator LoadCircuitScene()
+    private IEnumerator LoadCircuitScene(int mapIndex)
     {
+        string[] maps = { "Nascar", "Oasis", "OwlPlains", "Rainy" }; //Almacenamos los circuitos
+
+        //Excepcion
+        if (mapIndex < 0 || mapIndex >= maps.Length)
+        {
+            Debug.LogError("mapIndex invalido, redirigendo a los jugadores hacia... Nascar");
+            mapIndex = 0;
+        }
+
+        string mapToLoad = maps[mapIndex];
+        SceneManager.LoadScene(mapToLoad);
+
         // Cargar la escena del circuito
-        SceneManager.LoadScene("Nascar");
+        SceneManager.LoadScene(mapToLoad);
 
         // Esperar a que la escena se cargue
         yield return new WaitForSeconds(1f);

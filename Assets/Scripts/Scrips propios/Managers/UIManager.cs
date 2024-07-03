@@ -57,7 +57,7 @@ public class UIManager : Singleton<UIManager>
     public void InitPositionText(int playerIndex, int totalPlayers, TextMeshProUGUI positionText)
     {
         positions = positionText;
-        if (playerIndex < totalPlayers)
+        if (playerIndex <= totalPlayers)
         {
             positions.text = $"{playerIndex + 1}/{totalPlayers}";
         }
@@ -143,20 +143,23 @@ public class UIManager : Singleton<UIManager>
 
     private void VoteForMap(int mapIndex)
     {
+
         if (NetworkManager.Singleton.IsClient)
         {
-            PlayerVote.Instance.VoteForMapServerRpc(mapIndex);
+            Debug.Log($"Voting for map {mapIndex}");
+            VotingManager.Instance.VoteForMapServerRpc(mapIndex);
         }
     }
 
-    public void UpdateMapVotes(int[] mapVotes)
+    public void UpdateMapVotes(int updatedVote, int mapIndex)
     {
         // Actualizar los textos de los botones de mapa con el número de votos
-        for (int i = 0; i < mapVoteTexts.Length; i++)
-        {
-            mapVoteTexts[i].text = $"Map {i + 1}: {mapVotes[i]} votes";
-        }
+        Debug.Log("Updating map votes UI");
+        mapVoteTexts[mapIndex].text = $"Map {mapIndex + 1}: {updatedVote} votes";
+
     }
+
+
 
     private T FindLocalPlayer<T>() where T : NetworkBehaviour
     {
@@ -179,7 +182,7 @@ public class UIManager : Singleton<UIManager>
         }
     }
 
-
+    
 }
 
 
