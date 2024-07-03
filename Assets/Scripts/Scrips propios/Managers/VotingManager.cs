@@ -1,11 +1,6 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using TMPro;
 using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.InputSystem;
-using UnityEngine.UI;
 
 public class VotingManager : Singleton<VotingManager>
 {
@@ -18,12 +13,23 @@ public class VotingManager : Singleton<VotingManager>
 
     void Start()
     {
-        // Inicialización si es necesario
+        nascarVotes.OnValueChanged += OnVotesChanged;
+        oasisVotes.OnValueChanged += OnVotesChanged;
+        owlPlainsVotes.OnValueChanged += OnVotesChanged;
+        rainyVotes.OnValueChanged += OnVotesChanged;
     }
 
-    void Update()
+    void OnDestroy()
     {
-        // Lógica de actualización si es necesario
+        nascarVotes.OnValueChanged -= OnVotesChanged;
+        oasisVotes.OnValueChanged -= OnVotesChanged;
+        owlPlainsVotes.OnValueChanged -= OnVotesChanged;
+        rainyVotes.OnValueChanged -= OnVotesChanged;
+    }
+
+    private void OnVotesChanged(int previousValue, int newValue)
+    {
+        UpdateAllVotesClientRpc(nascarVotes.Value, oasisVotes.Value, owlPlainsVotes.Value, rainyVotes.Value);
     }
 
     [ServerRpc(RequireOwnership = false)]
@@ -39,7 +45,8 @@ public class VotingManager : Singleton<VotingManager>
 
         IncreaseVote(mapIndex);
         playerVotes[playerId] = mapIndex;
-        UpdateVotesClientRpc(mapIndex);
+        // Inmediatamente envía los votos actualizados a todos los clientes
+        UpdateAllVotesClientRpc(nascarVotes.Value, oasisVotes.Value, owlPlainsVotes.Value, rainyVotes.Value);
     }
 
     private void DecreaseVote(int mapIndex)
@@ -81,26 +88,12 @@ public class VotingManager : Singleton<VotingManager>
     }
 
     [ClientRpc]
-    private void UpdateVotesClientRpc(int mapIndex)
+    private void UpdateAllVotesClientRpc(int nascarVotes, int oasisVotes, int owlPlainsVotes, int rainyVotes)
     {
-        int updatedVote = 0;
-        switch (mapIndex)
-        {
-            case 0:
-                updatedVote = nascarVotes.Value;
-                break;
-            case 1:
-                updatedVote = oasisVotes.Value;
-                break;
-            case 2:
-                updatedVote = owlPlainsVotes.Value;
-                break;
-            case 3:
-                updatedVote = rainyVotes.Value;
-                break;
-        }
-
-        UIManager.Instance.UpdateMapVotes(updatedVote, mapIndex);
+        UIManager.Instance.UpdateMapVotes(nascarVotes, 0);
+        UIManager.Instance.UpdateMapVotes(oasisVotes, 1);
+        UIManager.Instance.UpdateMapVotes(owlPlainsVotes, 2);
+        UIManager.Instance.UpdateMapVotes(rainyVotes, 3);
     }
 
     public int GetWinningMap()
