@@ -126,11 +126,11 @@ public class CarController : NetworkBehaviour
         base.OnNetworkSpawn();
         Debug.Log("OnNetworkSpawn llamado.");
 
-        if (!enabled)
-        {
-            enabled = true;
-            Debug.Log("CarController activado en OnNetworkSpawn.");
-        }
+        //if (!enabled)
+        //{
+        //    enabled = true;
+        //    Debug.Log("CarController activado en OnNetworkSpawn.");
+        //}
 
         if (IsServer)
         {
