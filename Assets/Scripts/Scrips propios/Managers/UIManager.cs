@@ -43,6 +43,8 @@ public class UIManager : Singleton<UIManager>
     [SerializeField] public TextMeshProUGUI positions;
     private Speedometer speedometer;
 
+    string [] mapsArray = { "nascarVotes", "oasisVotes", "owlPlainsVotes", "rainyVotes" };
+
     private void Awake()
     {
         Cursor.visible = true;
@@ -155,7 +157,7 @@ public class UIManager : Singleton<UIManager>
     {
         // Actualizar los textos de los botones de mapa con el número de votos
         Debug.Log("Updating map votes UI");
-        mapVoteTexts[mapIndex].text = $"Map {mapIndex + 1}: {updatedVote} votes";
+        mapVoteTexts[mapIndex].text = $"{updatedVote}";
 
     }
 
