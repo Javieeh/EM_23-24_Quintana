@@ -25,6 +25,8 @@ public class CarController : NetworkBehaviour
     public NetworkVariable<float> InputAcceleration = new NetworkVariable<float>();
     public NetworkVariable<float> InputSteering = new NetworkVariable<float>();
     public NetworkVariable<float> InputBrake = new NetworkVariable<float>();
+    //public NetworkVariable<float> NetworkSpeed = new NetworkVariable<float>(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+
 
     private Rigidbody _rigidbody;
     private float _steerHelper = 0.8f;
@@ -37,7 +39,7 @@ public class CarController : NetworkBehaviour
     private CheckpointManager checkpointManager;
     private LapTimeController lapTimeController;
 
-    public float _currentSpeed = 0;
+    public NetworkVariable<float> _currentSpeed = new NetworkVariable<float>();
     private bool validReset = false;
 
     public int id;
@@ -47,15 +49,15 @@ public class CarController : NetworkBehaviour
     public float projectileSpeed;
     public float projectileLife;
 
-    private float Speed
+    public NetworkVariable<float> Speed
     {
         get => _currentSpeed;
-        set
+        /*set
         {
-            if (Math.Abs(_currentSpeed - value) < float.Epsilon) return;
+            if (Math.Abs(_currentSpeed.Value - value) < float.Epsilon) return;
             _currentSpeed = value;
-            OnSpeedChangeEvent?.Invoke(_currentSpeed);
-        }
+            OnSpeedChangeEvent?.Invoke(_currentSpeed.Value);
+        }*/
     }
 
     public delegate void OnSpeedChangeDelegate(float newVal);
@@ -147,8 +149,7 @@ public class CarController : NetworkBehaviour
 
     public void Update()
     {
-        Speed = _rigidbody.velocity.magnitude;
-
+        Speed.Value = _rigidbody.velocity.magnitude;
         if (IsOwner && IsSpawned && NetworkManager.Singleton.IsClient)
         {
             float steeringInput = Mathf.Clamp(Input.GetAxis("Horizontal"), -1, 1);
@@ -180,7 +181,7 @@ public class CarController : NetworkBehaviour
             Debug.LogWarning("Intento de escritura de cliente detectado en SubmitInputsServerRpc: " + NetworkManager.LocalClientId);
         }
     }
-
+   
     public void FixedUpdate()
     {
         if (!IsServer || !IsSpawned) return;
@@ -189,6 +190,7 @@ public class CarController : NetworkBehaviour
         float acceleration = InputAcceleration.Value;
         float brake = InputBrake.Value;
 
+        float speed = _rigidbody.velocity.magnitude * 3.6f;
         Debug.Log($"FixedUpdate - Steering: {steering}, Acceleration: {acceleration}, Brake: {brake}");
 
         foreach (AxleInfo axleInfo in axleInfos)

@@ -11,12 +11,13 @@ public class PlayersManager : Singleton<PlayersManager>
     private Transform[] placeholders; // Array de posiciones para los jugadores en el lobby
 
     private NetworkVariable<int> playersInGame = new NetworkVariable<int>();
-    private int nextPlaceholderIndex = 0; // Índice para el siguiente placeholder disponible
+    private int nextPlaceholderIndex = 0; // ï¿½ndice para el siguiente placeholder disponible
     private int readyPlayersCount = 0; // Conteo de jugadores listos
     private Dictionary<ulong, GameObject> spawnedPlayers = new Dictionary<ulong, GameObject>();
 
+    public Rigidbody rigidToSpeed;
     [SerializeField] private GameObject prefab;
-    [SerializeField] private int countdownTime = 3; // Tiempo de cuenta atrás en segundos
+    [SerializeField] private int countdownTime = 3; // Tiempo de cuenta atrï¿½s en segundos
 
     public int PlayersInGame
     {
@@ -57,7 +58,7 @@ public class PlayersManager : Singleton<PlayersManager>
         {
             Debug.Log("Someone disconnected...");
             playersInGame.Value--;
-            // Aquí podrías implementar la lógica para liberar el placeholder si es necesario
+            // Aquï¿½ podrï¿½as implementar la lï¿½gica para liberar el placeholder si es necesario
         }
     }
 
@@ -72,7 +73,7 @@ public class PlayersManager : Singleton<PlayersManager>
         Transform spawnPoint = placeholders[nextPlaceholderIndex];
         Vector3 spawnPosition = spawnPoint.position;
 
-        // Obtén el prefab del jugador registrado en el NetworkManager
+        // Obtï¿½n el prefab del jugador registrado en el NetworkManager
         GameObject playerPrefab = prefab;
 
         if (playerPrefab == null)
@@ -81,7 +82,7 @@ public class PlayersManager : Singleton<PlayersManager>
             return;
         }
 
-        // Instancia el jugador en la posición del placeholder y con la rotación predeterminada
+        // Instancia el jugador en la posiciï¿½n del placeholder y con la rotaciï¿½n predeterminada
         GameObject player = Instantiate(playerPrefab, spawnPosition, spawnPoint.rotation);
         NetworkObject networkObject = player.GetComponent<NetworkObject>();
 
@@ -105,7 +106,7 @@ public class PlayersManager : Singleton<PlayersManager>
         // Evitar que el jugador se destruya al cargar una nueva escena
         DontDestroyOnLoad(player);
 
-        // Añadir el jugador al diccionario para evitar re-instantanciación
+        // Aï¿½adir el jugador al diccionario para evitar re-instantanciaciï¿½n
         spawnedPlayers.Add(clientId, player);
 
         nextPlaceholderIndex++;
@@ -220,7 +221,7 @@ public class PlayersManager : Singleton<PlayersManager>
 
     private Transform[] GetStartPositions()
     {
-        // Encuentra los objetos de posición de inicio en la escena del circuito
+        // Encuentra los objetos de posiciï¿½n de inicio en la escena del circuito
         GameObject[] startObjects = GameObject.FindGameObjectsWithTag("StartPosition");
         Transform[] startPositions = new Transform[startObjects.Length];
         for (int i = 0; i < startObjects.Length; i++)
@@ -237,6 +238,21 @@ public class PlayersManager : Singleton<PlayersManager>
 
     private void Update()
     {
-        // Opcional: cualquier lógica de actualización
+        // Opcional: cualquier lï¿½gica de actualizaciï¿½n
+    }
+    public Rigidbody GetRB()
+    {
+        GameObject[] players = GameObject.FindGameObjectsWithTag("NetworkPlayer");
+
+        foreach (var player in players)
+        {
+            if (player.GetComponent<NetworkObject>().IsOwner)
+            {
+                
+                return player.GetComponentInChildren<Rigidbody>();
+            } 
+        }
+        Debug.Log("Devuelve nulo");
+        return null;
     }
 }
