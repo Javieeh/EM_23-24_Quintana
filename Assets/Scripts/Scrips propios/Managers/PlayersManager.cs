@@ -1,10 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI;
+using UnityEngine.UIElements;
 
 public class PlayersManager : Singleton<PlayersManager>
 {
@@ -16,8 +17,11 @@ public class PlayersManager : Singleton<PlayersManager>
     private int readyPlayersCount = 0; // Conteo de jugadores listos
     private Dictionary<ulong, GameObject> spawnedPlayers = new Dictionary<ulong, GameObject>();
 
+    public Rigidbody rigidToSpeed;
     [SerializeField] private GameObject prefab;
     [SerializeField] private int countdownTime = 3; // Tiempo de cuenta atrás en segundos
+
+    public GameObject projectilePrefab;
 
     public int PlayersInGame
     {
@@ -49,20 +53,8 @@ public class PlayersManager : Singleton<PlayersManager>
             {
                 SpawnPlayer(clientId, "Player" + clientId); // Asignar un nombre inicial basado en el ID del cliente
             }
-
-            // Enviar información de los jugadores actuales al nuevo cliente
-            foreach (var player in spawnedPlayers.Values)
-            {
-                var playerName = player.GetComponent<PlayerName>();
-                if (playerName != null)
-                {
-                    playerName.SendCurrentNameToClient(clientId);
-                }
-            }
         }
     }
-
-
 
     private void OnClientDisconnected(ulong clientId)
     {
@@ -96,6 +88,7 @@ public class PlayersManager : Singleton<PlayersManager>
 
         // Instancia el jugador en la posición del placeholder y con la rotación predeterminada
         GameObject player = Instantiate(playerPrefab, spawnPosition, spawnPoint.rotation);
+        player.transform.GetChild(0).GetComponent<CarController>().projectilePrefab = projectilePrefab;
         NetworkObject networkObject = player.GetComponent<NetworkObject>();
 
         if (networkObject == null)
@@ -108,10 +101,7 @@ public class PlayersManager : Singleton<PlayersManager>
         // Marca el objeto como perteneciente al jugador local y lo instancia en la red
         networkObject.SpawnAsPlayerObject(clientId, true);
 
-        // Añadir el jugador al diccionario para evitar re-instantanciación
-        spawnedPlayers.Add(clientId, player);
-
-        // Asigna el nombre al jugador utilizando SetName para sincronizar con todos los clientes
+        // Asigna el nombre al jugador
         var playerNameComponent = player.GetComponent<PlayerName>();
         if (playerNameComponent != null)
         {
@@ -120,6 +110,9 @@ public class PlayersManager : Singleton<PlayersManager>
 
         // Evitar que el jugador se destruya al cargar una nueva escena
         DontDestroyOnLoad(player);
+
+        // Añadir el jugador al diccionario para evitar re-instantanciación
+        spawnedPlayers.Add(clientId, player);
 
         nextPlaceholderIndex++;
     }
@@ -139,20 +132,24 @@ public class PlayersManager : Singleton<PlayersManager>
 
         if (readyPlayersCount >= 2)
         {
-            StartCoroutine(StartCountdown());
+            int winningMapIndex = VotingManager.Instance.GetWinningMap(); //Cogemos el mapa ganador y lo pasamos como variable
+            StartCoroutine(StartCountdown(winningMapIndex));
+        }
+        if (readyPlayersCount >= 2)
+        {
+            
         }
     }
 
-    private IEnumerator StartCountdown()
+    private IEnumerator StartCountdown(int winningMapIndex)
     {
         for (int i = countdownTime; i > 0; i--)
         {
-            // Enviar el tiempo restante a los clientes
             UpdateCountdownClientRpc(i);
             yield return new WaitForSeconds(1f);
         }
 
-        StartGame();
+        StartGame(winningMapIndex);
     }
 
     [ClientRpc]
@@ -161,22 +158,34 @@ public class PlayersManager : Singleton<PlayersManager>
         UIManager.Instance.UpdateCountdownText(timeRemaining);
     }
 
-    private void StartGame()
+    private void StartGame(int mapIndex)
     {
-        Debug.Log("Starting game...");
-        LoadCircuitSceneClientRpc();
+        Debug.Log("Starting game with map index: " + mapIndex);
+        LoadCircuitSceneClientRpc(mapIndex);
     }
 
     [ClientRpc]
-    private void LoadCircuitSceneClientRpc()
+    private void LoadCircuitSceneClientRpc(int mapIndex)
     {
-        StartCoroutine(LoadCircuitScene());
+        StartCoroutine(LoadCircuitScene(mapIndex));
     }
 
-    private IEnumerator LoadCircuitScene()
+    private IEnumerator LoadCircuitScene(int mapIndex)
     {
+        string[] maps = { "Nascar", "Oasis", "OwlPlains", "Rainy", "NascarC" }; //Almacenamos los circuitos
+
+        //Excepcion
+        if (mapIndex < 0 || mapIndex >= maps.Length)
+        {
+            Debug.LogError("mapIndex invalido, redirigendo a los jugadores hacia... Nascar");
+            mapIndex = 0;
+        }
+
+        string mapToLoad = maps[mapIndex];
+        SceneManager.LoadScene(mapToLoad);
+
         // Cargar la escena del circuito
-        SceneManager.LoadScene("Nascar");
+        SceneManager.LoadScene(mapToLoad);
 
         // Esperar a que la escena se cargue
         yield return new WaitForSeconds(1f);
@@ -187,6 +196,7 @@ public class PlayersManager : Singleton<PlayersManager>
         Transform[] startPositions = GetStartPositions();
 
         // Mover a los jugadores a las posiciones iniciales en la nueva escena
+        //A este forEach solo accede el Host ya que spawnedPlayers no es una networkVariable
         int index = 0;
         foreach (var player in spawnedPlayers.Values)
         {
@@ -195,7 +205,7 @@ public class PlayersManager : Singleton<PlayersManager>
                 Debug.Log($"Moving player {player.name} to position {startPositions[index].position}");
                 player.transform.position = startPositions[index].position;
                 player.transform.rotation = startPositions[index].rotation;
-
+                
                 index++;
             }
             else
@@ -205,6 +215,7 @@ public class PlayersManager : Singleton<PlayersManager>
             }
         }
 
+        //Aqui acceden todos los clientes
         GameObject[] players = GameObject.FindGameObjectsWithTag("NetworkPlayer");
 
         foreach (var player in players)
@@ -212,30 +223,15 @@ public class PlayersManager : Singleton<PlayersManager>
             if (player.GetComponent<NetworkObject>().IsOwner)
             {
                 player.GetComponent<PlayerCamera>().enabled = true;
+                
             }
             player.GetComponentInChildren<CarController>().enabled = true;
+            player.GetComponent<Player>().UpdatePlayerAttributesServerRpc();
+
         }
 
-        // Asignar la imagen de fade a todos los CarControllers de los jugadores (RAFA)
-        AssignFadeImageClientRpc();
-        //
+        UpdatePlayerTexts(players);
     }
-
-
-
-    //PARA ASIGNAR EL FADETOBLACK IMAGE A LOS CLIENTE (RAFA)
-    [ClientRpc]
-    private void AssignFadeImageClientRpc()
-    {
-        Image fadeImage = GameObject.Find("FadeImage").GetComponent<Image>();
-        var carControllers = FindObjectsOfType<CarController>();
-        foreach (var carController in carControllers)
-        {
-            carController.fadeImage = fadeImage;
-        }
-    }
-
-    //
 
     public Transform GetStartPosition(ulong clientId)
     {
@@ -263,6 +259,25 @@ public class PlayersManager : Singleton<PlayersManager>
         return startPositions;
     }
 
+    private void UpdatePlayerTexts(GameObject[] players)
+    {
+        TextMeshProUGUI position = GameObject.FindGameObjectWithTag("PositionText").GetComponent<TextMeshProUGUI>();
+        foreach (var player in players)
+        {
+            NetworkObject networkObject = player.GetComponent<NetworkObject>();
+
+            if (networkObject.IsOwner)
+            {
+                UIManager.Instance.InitPositionText((int) networkObject.OwnerClientId, PlayersInGame, position);
+            }
+        }
+    }
+
+    private void UpdateNames(GameObject[] players)
+    {
+        
+    }
+
     public bool TryGetPlayer(ulong clientId, out GameObject player)
     {
         return spawnedPlayers.TryGetValue(clientId, out player);
@@ -271,5 +286,26 @@ public class PlayersManager : Singleton<PlayersManager>
     private void Update()
     {
         // Opcional: cualquier lógica de actualización
+    }
+
+    public Dictionary<ulong, GameObject> GetSpawnedPlayers()
+    {
+        return spawnedPlayers;
+    }
+
+    public Rigidbody GetRB()
+    {
+        GameObject[] players = GameObject.FindGameObjectsWithTag("NetworkPlayer");
+
+        foreach (var player in players)
+        {
+            if (player.GetComponent<NetworkObject>().IsOwner)
+            {
+
+                return player.GetComponentInChildren<Rigidbody>();
+            }
+        }
+        Debug.Log("Devuelve nulo");
+        return null;
     }
 }

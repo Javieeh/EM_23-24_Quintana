@@ -18,11 +18,17 @@ public class InputController : NetworkBehaviour
 
     public void OnMove(InputAction.CallbackContext context)
     {
-        if (IsOwner)
+        var input = context.ReadValue<Vector2>();
+
+        if (!IsOwner) return;
+        if (IsClient)
         {
-            var input = context.ReadValue<Vector2>();
-            
-            SubmitMoveInputServerRpc(input.y, input.x);
+            //Debug.Log($"Cliente OnMove - Acceleration: {input.y}, Steering: {input.x}");
+            MoveServerRpc(input.y, input.x);
+        } if (IsServer)
+        {
+            car.InputAcceleration.Value = input.y;
+            car.InputSteering.Value = input.x;
         }
     }
 
@@ -31,8 +37,8 @@ public class InputController : NetworkBehaviour
         if (IsOwner)
         {
             var input = context.ReadValue<float>();
-            
-            SubmitBrakeInputServerRpc(input);
+            Debug.Log($"Cliente OnBrake - Brake: {input}");
+            BrakeServerRpc(input);
         }
     }
 
@@ -44,11 +50,11 @@ public class InputController : NetworkBehaviour
         }
     }
 
-    [ServerRpc(RequireOwnership = false)]
-    private void SubmitMoveInputServerRpc(float acceleration, float steering)
+    [ServerRpc]
+    private void MoveServerRpc(float acceleration, float steering)
     {
-       
-        if (car != null && car.IsServer)
+        //Debug.Log($"Servidor SubmitMoveInputServerRpc - Acceleration: {acceleration}, Steering: {steering}");
+        if (car != null)
         {
             car.InputAcceleration.Value = acceleration;
             car.InputSteering.Value = steering;
@@ -56,9 +62,9 @@ public class InputController : NetworkBehaviour
     }
 
     [ServerRpc(RequireOwnership = false)]
-    private void SubmitBrakeInputServerRpc(float brake)
+    private void BrakeServerRpc(float brake)
     {
-       
+        Debug.Log($"Servidor SubmitBrakeInputServerRpc - Brake: {brake}");
         if (car != null && car.IsServer)
         {
             car.InputBrake.Value = brake;

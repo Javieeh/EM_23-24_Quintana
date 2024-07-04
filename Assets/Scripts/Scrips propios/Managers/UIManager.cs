@@ -5,15 +5,19 @@ using TMPro;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class UIManager : Singleton<UIManager>
 {
+
+
     [Header("INITIAL MENU")]
     [SerializeField] private GameObject initialMenu;
     [SerializeField] private Button startServerButton;
     [SerializeField] private Button startHostButton;
     [SerializeField] private Button startClientButton;
+    [SerializeField] private Button startLocalButton;
 
     [Header("SELECTION MENU")]
     [SerializeField] private GameObject selectionMenu;
@@ -35,15 +39,19 @@ public class UIManager : Singleton<UIManager>
     [SerializeField] private Button mapButton2;
     [SerializeField] private Button mapButton3;
     [SerializeField] private Button mapButton4;
+    [SerializeField] private Button fightMapButton;
     [SerializeField] private TextMeshProUGUI[] mapVoteTexts;
 
     [Header("SPEEDOMETER")]
-    [SerializeField] public TextMeshProUGUI[] playerPosTexts;
+    [SerializeField] public TextMeshProUGUI positions;
     private Speedometer speedometer;
+
+    string [] mapsArray = { "nascarVotes", "oasisVotes", "owlPlainsVotes", "rainyVotes", "fightVotes" };
 
     private void Awake()
     {
         Cursor.visible = true;
+
     }
 
     private void Update()
@@ -51,15 +59,14 @@ public class UIManager : Singleton<UIManager>
         playersInGameText.text = $"Players in game: {PlayersManager.Instance.PlayersInGame}";
     }
 
-    public void UpdatePlayerPosition(string playerName, int pos)
+    public void InitPositionText(int playerIndex, int totalPlayers, TextMeshProUGUI positionText)
     {
-        // Actualizamos el texto correspondiente en la interfaz
-        if (pos - 1 < playerPosTexts.Length)
+        positions = positionText;
+        if (playerIndex <= totalPlayers)
         {
-            playerPosTexts[pos - 1].text = $"{pos}. {playerName}";
+            //positions.text = $"{playerIndex + 1}/{totalPlayers}";
         }
     }
-
     // Start is called before the first frame update
     void Start()
     {
@@ -76,7 +83,6 @@ public class UIManager : Singleton<UIManager>
             initialMenu.SetActive(false);
             selectionMenu.SetActive(true);
         });
-
         startServerButton.onClick.AddListener(() =>
         {
             if (NetworkManager.Singleton.StartServer())
@@ -89,8 +95,8 @@ public class UIManager : Singleton<UIManager>
             }
             initialMenu.SetActive(false);
             selectionMenu.SetActive(true);
-        });
-
+        }
+        );
         startClientButton.onClick.AddListener(() =>
         {
             if (NetworkManager.Singleton.StartClient())
@@ -103,7 +109,10 @@ public class UIManager : Singleton<UIManager>
             }
             initialMenu.SetActive(false);
             selectionMenu.SetActive(true);
-        });
+        }
+        );
+
+        startLocalButton.onClick.AddListener(() => SceneManager.LoadScene("Practica"));
 
         nextColorButton.onClick.AddListener(() =>
         {
@@ -138,24 +147,28 @@ public class UIManager : Singleton<UIManager>
         mapButton2.onClick.AddListener(() => VoteForMap(1));
         mapButton3.onClick.AddListener(() => VoteForMap(2));
         mapButton4.onClick.AddListener(() => VoteForMap(3));
+        fightMapButton.onClick.AddListener(() => VoteForMap(4));
     }
 
     private void VoteForMap(int mapIndex)
     {
+
         if (NetworkManager.Singleton.IsClient)
         {
-            PlayerVote.Instance.VoteForMapServerRpc(mapIndex);
+            Debug.Log($"Voting for map {mapIndex}");
+            VotingManager.Instance.VoteForMapServerRpc(mapIndex);
         }
     }
 
-    public void UpdateMapVotes(int[] mapVotes)
+    public void UpdateMapVotes(int updatedVote, int mapIndex)
     {
         // Actualizar los textos de los botones de mapa con el número de votos
-        for (int i = 0; i < mapVoteTexts.Length; i++)
-        {
-            mapVoteTexts[i].text = $"Map {i + 1}: {mapVotes[i]} votes";
-        }
+        Debug.Log("Updating map votes UI");
+        mapVoteTexts[mapIndex].text = $"{updatedVote}";
+
     }
+
+
 
     private T FindLocalPlayer<T>() where T : NetworkBehaviour
     {
@@ -177,4 +190,9 @@ public class UIManager : Singleton<UIManager>
             countdownText.text = $"Game starts in: {timeRemaining} seconds";
         }
     }
+
+    
 }
+
+
+

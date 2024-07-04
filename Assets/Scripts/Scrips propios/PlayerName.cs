@@ -17,8 +17,11 @@ public class PlayerName : NetworkBehaviour
             playerName.OnValueChanged += OnNameChanged;
         }
 
-        // Independientemente de si es el propietario o no, actualizamos el nombre.
-        UpdateName();
+        if (IsOwner)
+        {
+            SetName("Player" + NetworkManager.Singleton.LocalClientId); // Establece un nombre inicial
+
+        }
     }
 
     private void OnDestroy()
@@ -31,14 +34,15 @@ public class PlayerName : NetworkBehaviour
 
     private void OnNameChanged(NetworkString oldName, NetworkString newName)
     {
-        
-        UpdateName();
+        if (nameText != null)
+        {
+            nameText.text = newName.ToString();
+        }
     }
 
     [ServerRpc]
     private void SetNameServerRpc(NetworkString newName)
     {
-        
         playerName.Value = newName;
     }
 
@@ -46,34 +50,7 @@ public class PlayerName : NetworkBehaviour
     {
         if (IsOwner)
         {
-            
             SetNameServerRpc(new NetworkString { info = new Unity.Collections.FixedString32Bytes(newName) });
-        }
-    }
-
-    public void SendCurrentNameToClient(ulong clientId)
-    {
-      
-        SendCurrentNameClientRpc(clientId, playerName.Value);
-    }
-
-    [ClientRpc]
-    public void SendCurrentNameClientRpc(ulong clientId, NetworkString currentName)
-    {
-       
-        if (NetworkManager.Singleton.LocalClientId == clientId)
-        {
-            playerName.Value = currentName;
-            UpdateName();
-        }
-    }
-
-    private void UpdateName()
-    {
-        if (nameText != null)
-        {
-            
-            nameText.text = playerName.Value.ToString();
         }
     }
 }
