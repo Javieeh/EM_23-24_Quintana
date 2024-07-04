@@ -167,7 +167,7 @@ public class PlayersManager : Singleton<PlayersManager>
 
     private IEnumerator LoadCircuitScene(int mapIndex)
     {
-        string[] maps = { "Nascar", "Oasis", "OwlPlains", "Rainy" }; //Almacenamos los circuitos
+        string[] maps = { "Nascar", "Oasis", "OwlPlains", "Rainy", "NascarC" }; //Almacenamos los circuitos
 
         //Excepcion
         if (mapIndex < 0 || mapIndex >= maps.Length)
