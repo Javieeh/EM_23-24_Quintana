@@ -5,7 +5,6 @@ using TMPro;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class UIManager : Singleton<UIManager>
@@ -17,7 +16,6 @@ public class UIManager : Singleton<UIManager>
     [SerializeField] private Button startServerButton;
     [SerializeField] private Button startHostButton;
     [SerializeField] private Button startClientButton;
-    [SerializeField] private Button startLocalButton;
 
     [Header("SELECTION MENU")]
     [SerializeField] private GameObject selectionMenu;
@@ -39,7 +37,6 @@ public class UIManager : Singleton<UIManager>
     [SerializeField] private Button mapButton2;
     [SerializeField] private Button mapButton3;
     [SerializeField] private Button mapButton4;
-    [SerializeField] private Button mapButtonCombat;
     [SerializeField] private TextMeshProUGUI[] mapVoteTexts;
 
     [Header("SPEEDOMETER")]
@@ -111,13 +108,6 @@ public class UIManager : Singleton<UIManager>
             selectionMenu.SetActive(true);
         }
         );
-
-        startLocalButton.onClick.AddListener(() =>
-        {
-            SceneManager.LoadScene("Practica");
-        }
-        );
-
         nextColorButton.onClick.AddListener(() =>
         {
             // Obtener el jugador local y cambiar su color
@@ -151,7 +141,6 @@ public class UIManager : Singleton<UIManager>
         mapButton2.onClick.AddListener(() => VoteForMap(1));
         mapButton3.onClick.AddListener(() => VoteForMap(2));
         mapButton4.onClick.AddListener(() => VoteForMap(3));
-        mapButtonCombat.onClick.AddListener(()=> VoteForMap(4));
     }
 
     private void VoteForMap(int mapIndex)

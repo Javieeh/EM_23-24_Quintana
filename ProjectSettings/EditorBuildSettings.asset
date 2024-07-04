@@ -26,7 +26,4 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/_Scenes/Escenas propias/Circuitos/Rainy.unity
     guid: 0dad20aa7dc44744c9c329b99102d05e
-  - enabled: 1
-    path: Assets/_Scenes/Practica.unity
-    guid: d6e2aa16639489942a57f101bec7ad1e
   m_configObjects: {}

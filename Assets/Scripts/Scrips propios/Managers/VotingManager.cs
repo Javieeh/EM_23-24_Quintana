@@ -13,7 +13,6 @@ public class VotingManager : Singleton<VotingManager>
     private NetworkVariable<int> oasisVotes = new NetworkVariable<int>(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     private NetworkVariable<int> owlPlainsVotes = new NetworkVariable<int>(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     private NetworkVariable<int> rainyVotes = new NetworkVariable<int>(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
-    private NetworkVariable<int> combatVotes = new NetworkVariable<int>(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
     private Dictionary<ulong, int> playerVotes = new Dictionary<ulong, int>();
 
@@ -59,9 +58,6 @@ public class VotingManager : Singleton<VotingManager>
             case 3:
                 rainyVotes.Value--;
                 break;
-            case 4:
-                combatVotes.Value--;
-                break;
         }
     }
 
@@ -80,9 +76,6 @@ public class VotingManager : Singleton<VotingManager>
                 break;
             case 3:
                 rainyVotes.Value++;
-                break;
-            case 4:
-                combatVotes.Value++;
                 break;
         }
     }
@@ -105,9 +98,6 @@ public class VotingManager : Singleton<VotingManager>
             case 3:
                 updatedVote = rainyVotes.Value;
                 break;
-            case 4:
-                updatedVote = combatVotes.Value;
-                break;
         }
 
         UIManager.Instance.UpdateMapVotes(updatedVote, mapIndex);
@@ -119,9 +109,8 @@ public class VotingManager : Singleton<VotingManager>
         Debug.Log(oasisVotes.Value);
         Debug.Log(owlPlainsVotes.Value);
         Debug.Log(rainyVotes.Value);
-        Debug.Log(combatVotes.Value);
 
-        int[] votesArray = { nascarVotes.Value, oasisVotes.Value, owlPlainsVotes.Value, rainyVotes.Value, combatVotes.Value };
+        int[] votesArray = { nascarVotes.Value, oasisVotes.Value, owlPlainsVotes.Value, rainyVotes.Value };
         int max = -1;
         int winningMap = -1;
         for (int i = 0; i < votesArray.Length; i++)
