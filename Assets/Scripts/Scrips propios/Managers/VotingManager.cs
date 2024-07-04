@@ -8,6 +8,7 @@ public class VotingManager : Singleton<VotingManager>
     private NetworkVariable<int> oasisVotes = new NetworkVariable<int>(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     private NetworkVariable<int> owlPlainsVotes = new NetworkVariable<int>(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     private NetworkVariable<int> rainyVotes = new NetworkVariable<int>(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    private NetworkVariable<int> fightVotes = new NetworkVariable<int>(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
     private Dictionary<ulong, int> playerVotes = new Dictionary<ulong, int>();
 
@@ -17,6 +18,7 @@ public class VotingManager : Singleton<VotingManager>
         oasisVotes.OnValueChanged += OnVotesChanged;
         owlPlainsVotes.OnValueChanged += OnVotesChanged;
         rainyVotes.OnValueChanged += OnVotesChanged;
+        fightVotes.OnValueChanged += OnVotesChanged;
     }
 
     void OnDestroy()
@@ -25,11 +27,12 @@ public class VotingManager : Singleton<VotingManager>
         oasisVotes.OnValueChanged -= OnVotesChanged;
         owlPlainsVotes.OnValueChanged -= OnVotesChanged;
         rainyVotes.OnValueChanged -= OnVotesChanged;
+        fightVotes.OnValueChanged -= OnVotesChanged;
     }
 
     private void OnVotesChanged(int previousValue, int newValue)
     {
-        UpdateAllVotesClientRpc(nascarVotes.Value, oasisVotes.Value, owlPlainsVotes.Value, rainyVotes.Value);
+        UpdateAllVotesClientRpc(nascarVotes.Value, oasisVotes.Value, owlPlainsVotes.Value, rainyVotes.Value, fightVotes.Value);
     }
 
     [ServerRpc(RequireOwnership = false)]
@@ -46,7 +49,7 @@ public class VotingManager : Singleton<VotingManager>
         IncreaseVote(mapIndex);
         playerVotes[playerId] = mapIndex;
         // Inmediatamente envía los votos actualizados a todos los clientes
-        UpdateAllVotesClientRpc(nascarVotes.Value, oasisVotes.Value, owlPlainsVotes.Value, rainyVotes.Value);
+        UpdateAllVotesClientRpc(nascarVotes.Value, oasisVotes.Value, owlPlainsVotes.Value, rainyVotes.Value, fightVotes.Value);
     }
 
     private void DecreaseVote(int mapIndex)
@@ -64,6 +67,9 @@ public class VotingManager : Singleton<VotingManager>
                 break;
             case 3:
                 rainyVotes.Value--;
+                break;
+            case 4:
+                fightVotes.Value--;
                 break;
         }
     }
@@ -84,16 +90,20 @@ public class VotingManager : Singleton<VotingManager>
             case 3:
                 rainyVotes.Value++;
                 break;
+            case 4:
+                fightVotes.Value++;
+                break;
         }
     }
 
     [ClientRpc]
-    private void UpdateAllVotesClientRpc(int nascarVotes, int oasisVotes, int owlPlainsVotes, int rainyVotes)
+    private void UpdateAllVotesClientRpc(int nascarVotes, int oasisVotes, int owlPlainsVotes, int rainyVotes, int fightVotes)
     {
         UIManager.Instance.UpdateMapVotes(nascarVotes, 0);
         UIManager.Instance.UpdateMapVotes(oasisVotes, 1);
         UIManager.Instance.UpdateMapVotes(owlPlainsVotes, 2);
         UIManager.Instance.UpdateMapVotes(rainyVotes, 3);
+        UIManager.Instance.UpdateMapVotes(fightVotes, 4);
     }
 
     public int GetWinningMap()
@@ -102,8 +112,9 @@ public class VotingManager : Singleton<VotingManager>
         Debug.Log(oasisVotes.Value);
         Debug.Log(owlPlainsVotes.Value);
         Debug.Log(rainyVotes.Value);
+        Debug.Log(fightVotes.Value);
 
-        int[] votesArray = { nascarVotes.Value, oasisVotes.Value, owlPlainsVotes.Value, rainyVotes.Value };
+        int[] votesArray = { nascarVotes.Value, oasisVotes.Value, owlPlainsVotes.Value, rainyVotes.Value, fightVotes.Value };
         int max = -1;
         int winningMap = -1;
         for (int i = 0; i < votesArray.Length; i++)
