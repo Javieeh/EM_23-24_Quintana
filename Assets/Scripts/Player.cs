@@ -110,7 +110,7 @@ public class Player : NetworkBehaviour
     [ClientRpc]
     private void UpdatePlayerPositionsClientRpc()
     {
-        if (IsOwner)
+        if (IsOwner && GetComponentInChildren<CarController>().enabled)
         {
             Debug.Log("Player " + ID.Value + " ENTRA");
             UIManager.Instance.UpdateAllPlayerPositions(CurrentPosition.Value, PlayersManager.Instance.PlayersInGame);

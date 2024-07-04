@@ -607,7 +607,6 @@ public class CarController : NetworkBehaviour
     {
         Debug.Log("Shooting from the car!");
         GameObject projectile = Instantiate(projectilePrefab, projectileSpawn.position, projectileSpawn.rotation);
-        projectile.GetComponent<ProjectilCollision>().id = id;
         Rigidbody rb = projectile.GetComponent<Rigidbody>();
         if (rb != null)
         {

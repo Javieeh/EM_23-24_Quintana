@@ -45,7 +45,8 @@ public class RaceController : NetworkBehaviour
 
     private void Start()
     {
-        /*if (IsServer) StartCoroutine(CheckAllPlayersReady());*/
+        this.gameObject.GetComponent<NetworkObject>().Spawn();
+        //if (IsServer) StartCoroutine(CheckAllPlayersReady());
         foreach (Player player in _players){
             player.GetComponentInChildren<Rigidbody>().isKinematic = true;
         }
@@ -56,6 +57,7 @@ public class RaceController : NetworkBehaviour
         {
             _debuggingSpheres[i] = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             _debuggingSpheres[i].GetComponent<SphereCollider>().enabled = false;
+            _debuggingSpheres[i].GetComponent<MeshRenderer>().enabled = false;
         }
 
         // Obtener todos los jugadores al inicio
@@ -71,7 +73,7 @@ public class RaceController : NetworkBehaviour
         startUI_GO = GameObject.Find("StartGameUI");
         countDownNUM = GameObject.Find("Dynamic");
         textCountdown = countDownNUM.GetComponent<TextMeshProUGUI>();
-        textCountdown.text = "5";
+        textCountdown.text = "";
     }
 
     private void Update()
@@ -125,11 +127,9 @@ public class RaceController : NetworkBehaviour
 
     public void UpdateRaceProgress()
     {
-
         if (_players.Count == 0)
             return;
 
-        // Update car arc-lengths
         float[] arcLengths = new float[_players.Count];
 
         for (int i = 0; i < _players.Count; ++i)
@@ -149,15 +149,22 @@ public class RaceController : NetworkBehaviour
             }
         }
 
-        _players.Sort(new PlayerInfoComparer(arcLengths)); // Se ordenan los jugadores
-
-        string myRaceOrder = "";
-        foreach (var player in _players)
+        List<KeyValuePair<int, float>> sortedPlayers = new List<KeyValuePair<int, float>>();
+        for (int i = 0; i < _players.Count; i++)
         {
-            myRaceOrder += player.Name + " ";
+            sortedPlayers.Add(new KeyValuePair<int, float>(i, arcLengths[i]));
         }
 
-        Debug.Log("Race order: " + myRaceOrder);
+        sortedPlayers.Sort((x, y) => y.Value.CompareTo(x.Value));
+
+        for (int i = 0; i < sortedPlayers.Count; i++)
+        {
+            var playerIndex = sortedPlayers[i].Key;
+            _players[playerIndex].CurrentPosition.Value = i + 1; // Posición basada en 1
+        }
+
+        // Notifica a todos los clientes para actualizar la interfaz
+        //UpdatePlayerPositions();
     }
 
     float ComputeCarArcLength(int id)
@@ -228,11 +235,11 @@ public class RaceController : NetworkBehaviour
         {
             Debug.Log("AUN NO EMPIEZA....");
             remainingTime.Value -= Time.deltaTime; //se va restando el tiempo al contador de tiempo restante
-            textCountdown.text = remainingTime.Value.ToString();
+            textCountdown.text = "";
             if (remainingTime.Value < 0) //si el tiempo restante es menos que 0
             {
                 remainingTime.Value = 0; //se asigna que sea directamente 0 para que sea más sencillo realizar comprobaciones
-                textCountdown.text = remainingTime.Value.ToString();
+                textCountdown.text = "";
             }
             //Debug.Log(remainingTime.Value);
         }

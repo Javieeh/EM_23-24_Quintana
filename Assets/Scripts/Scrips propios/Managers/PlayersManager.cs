@@ -35,6 +35,7 @@ public class PlayersManager : Singleton<PlayersManager>
     {
         base.Awake();
         DontDestroyOnLoad(gameObject);
+
     }
 
     private void Start()
