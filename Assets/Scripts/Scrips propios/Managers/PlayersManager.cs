@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class PlayersManager : Singleton<PlayersManager>
 {
@@ -214,7 +215,27 @@ public class PlayersManager : Singleton<PlayersManager>
             }
             player.GetComponentInChildren<CarController>().enabled = true;
         }
+
+        // Asignar la imagen de fade a todos los CarControllers de los jugadores (RAFA)
+        AssignFadeImageClientRpc();
+        //
     }
+
+
+
+    //PARA ASIGNAR EL FADETOBLACK IMAGE A LOS CLIENTE (RAFA)
+    [ClientRpc]
+    private void AssignFadeImageClientRpc()
+    {
+        Image fadeImage = GameObject.Find("FadeImage").GetComponent<Image>();
+        var carControllers = FindObjectsOfType<CarController>();
+        foreach (var carController in carControllers)
+        {
+            carController.fadeImage = fadeImage;
+        }
+    }
+
+    //
 
     public Transform GetStartPosition(ulong clientId)
     {

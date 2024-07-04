@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
 using UnityEngine.UI;
+using Unity.Netcode.Components;
 
 public class CarController : NetworkBehaviour
 {
@@ -26,6 +27,7 @@ public class CarController : NetworkBehaviour
     public NetworkVariable<float> InputSteering = new NetworkVariable<float>();
     public NetworkVariable<float> InputBrake = new NetworkVariable<float>();
 
+    public NetworkRigidbody _networkRigidbody;
     private Rigidbody _rigidbody;
     private float _steerHelper = 0.8f;
 
@@ -33,6 +35,8 @@ public class CarController : NetworkBehaviour
     public Image fadeImage;
     private GameObject lastRoadSegment;
     private RespawnInfo lastRespawnInfo;
+    private Vector3 lastRespawnPosition = Vector3.zero;
+    private Quaternion lastRespawnRotation = Quaternion.identity;
 
     private CheckpointManager checkpointManager;
     private LapTimeController lapTimeController;
@@ -72,41 +76,58 @@ public class CarController : NetworkBehaviour
         projectileLife = 5;
         projectileSpeed = 80;
 
-        _rigidbody = GetComponent<Rigidbody>();
-        if (_rigidbody == null)
+        _networkRigidbody = GetComponent<NetworkRigidbody>();
+        if (_networkRigidbody == null)
         {
-            Debug.LogError("No Rigidbody found in children of Car.");
+            Debug.LogError("No NetworkRigidbody found in Car.");
+        }
+        else
+        {
+            _rigidbody = _networkRigidbody.GetComponent<Rigidbody>();
+            if (_rigidbody == null)
+            {
+                Debug.LogError("No Rigidbody found on the NetworkRigidbody.");
+            }
         }
     }
 
-
     private void OnEnable()
     {
-       
-
         NetworkObject networkObject = GetComponentInParent<NetworkObject>();
         if (networkObject == null)
         {
             Debug.LogError("NetworkObject no encontrado en el objeto padre de " + gameObject.name);
         }
-        
-
-       
 
         OnGameStarted();
         StartCoroutine(ReattemptFindComponents());
     }
 
+    private void OnGameStarted()
+    {
+        if (_networkRigidbody == null)
+        {
+            _networkRigidbody = GetComponentInChildren<NetworkRigidbody>();
+            if (_networkRigidbody == null)
+            {
+                Debug.LogError("No NetworkRigidbody found in children of Car.");
+            }
+            else
+            {
+                _rigidbody = _networkRigidbody.GetComponent<Rigidbody>();
+                if (_rigidbody == null)
+                {
+                    Debug.LogError("No Rigidbody found on the NetworkRigidbody.");
+                }
+            }
+        }
+
+        FindRequiredComponents();
+    }
+
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
-       
-
-        //if (!enabled)
-        //{
-        //    enabled = true;
-        //    Debug.Log("CarController activado en OnNetworkSpawn.");
-        //}
 
         if (IsServer)
         {
@@ -114,8 +135,6 @@ public class CarController : NetworkBehaviour
             InputAcceleration.Value = 0f;
             InputBrake.Value = 0f;
         }
-
-        
     }
 
     public void Update()
@@ -128,38 +147,25 @@ public class CarController : NetworkBehaviour
             float accelerationInput = Mathf.Clamp(Input.GetAxis("Vertical"), -1, 1);
             float brakeInput = Input.GetKey(KeyCode.Space) ? 1 : 0;
 
-           
             SubmitInputsServerRpc(steeringInput, accelerationInput, brakeInput);
         }
-        
     }
 
     [ServerRpc(RequireOwnership = false)]
     private void SubmitInputsServerRpc(float steering, float acceleration, float brake)
     {
-       
-        if (IsServer && IsSpawned)
-        {
-            
-            InputSteering.Value = steering;
-            InputAcceleration.Value = acceleration;
-            InputBrake.Value = brake;
-        }
-        else
-        {
-            Debug.LogWarning("Intento de escritura de cliente detectado en SubmitInputsServerRpc: " + NetworkManager.LocalClientId);
-        }
+        InputSteering.Value = steering;
+        InputAcceleration.Value = acceleration;
+        InputBrake.Value = brake;
     }
 
     public void FixedUpdate()
     {
-        if (!IsServer || !IsSpawned) return;
+        if (!IsServer || !IsSpawned || isPenalized) return;
 
         float steering = maxSteeringAngle * InputSteering.Value;
         float acceleration = InputAcceleration.Value;
         float brake = InputBrake.Value;
-
-       
 
         foreach (AxleInfo axleInfo in axleInfos)
         {
@@ -216,24 +222,9 @@ public class CarController : NetworkBehaviour
     {
         while (checkpointManager == null || lapTimeController == null)
         {
-          
             FindRequiredComponents();
             yield return new WaitForSeconds(1f);
         }
-    }
-
-    private void OnGameStarted()
-    {
-        if (_rigidbody == null)
-        {
-            _rigidbody = GetComponentInChildren<Rigidbody>();
-            if (_rigidbody == null)
-            {
-                Debug.LogError("No Rigidbody found in children of Car.");
-            }
-        }
-
-        FindRequiredComponents();
     }
 
     private void FindRequiredComponents()
@@ -243,19 +234,12 @@ public class CarController : NetworkBehaviour
         {
             Debug.LogError("CheckpointManager not found in the scene.");
         }
-        
 
         lapTimeController = FindObjectOfType<LapTimeController>();
         if (lapTimeController == null)
         {
             Debug.LogError("LapTimeController not found in the scene.");
         }
-       
-    }
-
-    public void SetLastRespawnInfo(RespawnInfo respawnInfo)
-    {
-        lastRespawnInfo = respawnInfo;
     }
 
     public void SetLastRoadSegment(GameObject roadSegment)
@@ -284,67 +268,168 @@ public class CarController : NetworkBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.CompareTag("Obstacle") && !isPenalized)
+        if (IsOwner && collision.gameObject.CompareTag("Obstacle") && !isPenalized)
         {
-            StartCoroutine(ApplyPenalty());
+            Debug.Log($"Collision with Obstacle detected by {NetworkManager.Singleton.LocalClientId}");
+            if (lastRespawnPosition != Vector3.zero)
+            {
+                ApplyPenaltyServerRpc(NetworkManager.Singleton.LocalClientId, lastRespawnPosition, lastRespawnRotation);
+            }
+            else
+            {
+                Debug.LogError("lastRespawnPosition is zero! Cannot respawn.");
+            }
         }
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Obstacle") && !isPenalized)
+        if (IsOwner)
         {
-            StartCoroutine(ApplyPenalty());
-        }
-
-        if (other.CompareTag("Carretera"))
-        {
-            RespawnInfo respawnInfo = other.GetComponent<RespawnInfo>();
-            if (respawnInfo != null)
+            if (other.CompareTag("Obstacle") && !isPenalized)
             {
-                SetLastRespawnInfo(respawnInfo);
+                Debug.Log($"Trigger with Obstacle detected by {NetworkManager.Singleton.LocalClientId}");
+                if (lastRespawnPosition != Vector3.zero)
+                {
+                    ApplyPenaltyServerRpc(NetworkManager.Singleton.LocalClientId, lastRespawnPosition, lastRespawnRotation);
+                }
+                else
+                {
+                    Debug.LogError("lastRespawnPosition is zero! Cannot respawn.");
+                }
             }
-        }
 
-        Checkpoint checkpoint = other.GetComponent<Checkpoint>();
-        if (checkpoint != null && checkpointManager != null)
-        {
-            if (checkpoint.gameObject.name == "CheckPoint 0" && !validReset)
+            if (other.CompareTag("Carretera"))
             {
-               
-                validReset = true;
+                Debug.Log($"Trigger with Carretera detected by {NetworkManager.Singleton.LocalClientId}");
+                RespawnInfo respawnInfo = other.GetComponent<RespawnInfo>();
+                if (respawnInfo != null)
+                {
+                    SetLastRespawnInfo(respawnInfo.respawnPoint.position, respawnInfo.respawnPoint.rotation);
+                    UpdateRespawnInfoServerRpc(NetworkManager.Singleton.LocalClientId, respawnInfo.respawnPoint.position, respawnInfo.respawnPoint.rotation);
+                }
             }
-            checkpointManager.CheckpointReached(checkpoint);
-        }
 
-        if (other.CompareTag("Finish") && checkpointManager != null)
-        {
-            checkpointManager.FinishLineReached();
-            if (!validReset)
+            Checkpoint checkpoint = other.GetComponent<Checkpoint>();
+            if (checkpoint != null && checkpointManager != null)
             {
-                // Si no es valido, NO hago nada                
+                Debug.Log($"Checkpoint reached by {NetworkManager.Singleton.LocalClientId}");
+                if (checkpoint.gameObject.name == "CheckPoint 0" && !validReset)
+                {
+                    validReset = true;
+                }
+                checkpointManager.CheckpointReached(checkpoint);
             }
-            if (validReset)
+
+            if (other.CompareTag("Finish") && checkpointManager != null)
             {
-                
-                lapTimeController.StartNewLap();
+                Debug.Log($"Finish line reached by {NetworkManager.Singleton.LocalClientId}");
+                checkpointManager.FinishLineReached();
+                if (!validReset)
+                {
+                    // Si no es valido, NO hago nada                
+                }
+                if (validReset)
+                {
+                    lapTimeController.StartNewLap();
+                }
             }
         }
     }
 
-    private IEnumerator ApplyPenalty()
+    [ClientRpc]
+    private void RespawnCarClientRpc(Vector3 respawnPosition, Quaternion respawnRotation, ulong clientId)
+    {
+        if (NetworkManager.Singleton.LocalClientId == clientId)
+        {
+            Debug.Log($"RespawnCarClientRpc executed for {clientId} with position {respawnPosition} and rotation {respawnRotation}");
+            Debug.Log($"Current position: {_rigidbody.transform.position}, Current rotation: {_rigidbody.transform.rotation}");
+
+            _rigidbody.isKinematic = true; // Hacer cinemático temporalmente
+            _rigidbody.transform.position = respawnPosition;
+            _rigidbody.transform.rotation = respawnRotation;
+            _rigidbody.velocity = Vector3.zero;
+            _rigidbody.angularVelocity = Vector3.zero;
+
+            // Usar MovePosition y MoveRotation para sincronizar correctamente con el motor de física
+            _rigidbody.MovePosition(respawnPosition);
+            _rigidbody.MoveRotation(respawnRotation);
+
+            _rigidbody.isKinematic = false; // Desactivar cinemático
+
+            Debug.Log($"New position: {_rigidbody.transform.position}, New rotation: {_rigidbody.transform.rotation}");
+        }
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void UpdateRespawnInfoServerRpc(ulong clientId, Vector3 position, Quaternion rotation)
+    {
+        Debug.Log($"UpdateRespawnInfoServerRpc called by {clientId} with position {position} and rotation {rotation}");
+
+        if (NetworkManager.Singleton.ConnectedClients.TryGetValue(clientId, out NetworkClient client))
+        {
+            var carController = client.PlayerObject.GetComponentInChildren<CarController>();
+            if (carController != null)
+            {
+                carController.SetLastRespawnInfo(position, rotation);
+                Debug.Log($"Updated lastRespawnInfo for {clientId} with position {position} and rotation {rotation}");
+            }
+        }
+        else
+        {
+            Debug.LogError($"Client {clientId} not found in ConnectedClients.");
+        }
+    }
+
+    public void SetLastRespawnInfo(Vector3 position, Quaternion rotation)
+    {
+        lastRespawnPosition = position;
+        lastRespawnRotation = rotation;
+        Debug.Log($"Set lastRespawnInfo for {NetworkManager.Singleton.LocalClientId} with position {position} and rotation {rotation}");
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void ApplyPenaltyServerRpc(ulong clientId, Vector3 position, Quaternion rotation)
+    {
+        Debug.Log($"ApplyPenaltyServerRpc called by {clientId}");
+        StartCoroutine(ApplyPenaltyCoroutine(clientId, position, rotation));
+    }
+
+    private IEnumerator ApplyPenaltyCoroutine(ulong clientId, Vector3 respawnPosition, Quaternion respawnRotation)
     {
         isPenalized = true;
-        yield return StartCoroutine(FadeToBlack());
+        Debug.Log($"Starting ApplyPenaltyCoroutine for {clientId}");
+        FadeToBlackClientRpc(clientId);
 
-        RespawnCar();
+        // Enviar la información de reaparición solo al cliente que colisiona
+        RespawnCarClientRpc(respawnPosition, respawnRotation, clientId);
 
         yield return new WaitForSeconds(penaltyTime);
-        yield return StartCoroutine(FadeToClear());
+        FadeToClearClientRpc(clientId);
         isPenalized = false;
     }
 
-    private IEnumerator FadeToBlack()
+    [ClientRpc]
+    private void FadeToBlackClientRpc(ulong clientId)
+    {
+        if (NetworkManager.Singleton.LocalClientId == clientId)
+        {
+            Debug.Log($"FadeToBlackClientRpc executed for {clientId}");
+            StartCoroutine(FadeToBlackCoroutine());
+        }
+    }
+
+    [ClientRpc]
+    private void FadeToClearClientRpc(ulong clientId)
+    {
+        if (NetworkManager.Singleton.LocalClientId == clientId)
+        {
+            Debug.Log($"FadeToClearClientRpc executed for {clientId}");
+            StartCoroutine(FadeToClearCoroutine());
+        }
+    }
+
+    private IEnumerator FadeToBlackCoroutine()
     {
         float elapsedTime = 0f;
         Color color = fadeImage.color;
@@ -361,7 +446,7 @@ public class CarController : NetworkBehaviour
         fadeImage.color = color;
     }
 
-    private IEnumerator FadeToClear()
+    private IEnumerator FadeToClearCoroutine()
     {
         float fadeDuration = 1f;
         float elapsedTime = 0f;
@@ -377,17 +462,6 @@ public class CarController : NetworkBehaviour
 
         color.a = 0;
         fadeImage.color = color;
-    }
-
-    private void RespawnCar()
-    {
-        Vector3 respawnPosition = lastRespawnInfo.respawnPoint.position;
-        Quaternion respawnRotation = lastRespawnInfo.respawnPoint.rotation;
-
-        _rigidbody.position = respawnPosition;
-        _rigidbody.rotation = respawnRotation;
-        _rigidbody.velocity = Vector3.zero;
-        _rigidbody.angularVelocity = Vector3.zero;
     }
 
     #endregion
@@ -483,7 +557,6 @@ public class CarController : NetworkBehaviour
             rb.velocity = projectileSpawn.forward * projectileSpeed;
         }
         Destroy(projectile, projectileLife);
-        
     }
 
     #endregion

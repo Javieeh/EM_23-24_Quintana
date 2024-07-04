@@ -5620,6 +5620,10 @@ PrefabInstance:
       propertyPath: m_TagString
       value: Obstacle
       objectReference: {fileID: 0}
+    - target: {fileID: 3450996864146420284, guid: e4f341a478065de4b93b6a6349d624fb, type: 3}
+      propertyPath: m_TagString
+      value: Obstacle
+      objectReference: {fileID: 0}
     - target: {fileID: 4908728187931683484, guid: e4f341a478065de4b93b6a6349d624fb, type: 3}
       propertyPath: m_TagString
       value: Finish
