@@ -83,8 +83,8 @@ public class LobbyManager : MonoBehaviour
         // Crear un nuevo Player y configurarlo
         GameObject playerObj = new GameObject("Player");
         Player nuevoJugador = playerObj.AddComponent<Player>();
-        nuevoJugador.Name = nombreJugador;
-        nuevoJugador.CarColor = colorCoche;
+        nuevoJugador.Name.Value = nombreJugador;
+        nuevoJugador.CarColor.Value = colorCoche;
         //nuevoJugador.car = materialCoche.gameObject;
 
         CanvasSeleccion.SetActive(false);

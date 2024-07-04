@@ -5,6 +5,7 @@ using TMPro;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UIElements;
 
 public class PlayersManager : Singleton<PlayersManager>
 {
@@ -220,6 +221,8 @@ public class PlayersManager : Singleton<PlayersManager>
                 player.GetComponent<PlayerCamera>().enabled = true;
             }
             player.GetComponentInChildren<CarController>().enabled = true;
+            player.GetComponent<Player>().UpdatePlayerAttributesServerRpc();
+
         }
 
         UpdatePlayerTexts(players);
@@ -265,6 +268,11 @@ public class PlayersManager : Singleton<PlayersManager>
         }
     }
 
+    private void UpdateNames(GameObject[] players)
+    {
+        
+    }
+
     public bool TryGetPlayer(ulong clientId, out GameObject player)
     {
         return spawnedPlayers.TryGetValue(clientId, out player);
@@ -273,5 +281,10 @@ public class PlayersManager : Singleton<PlayersManager>
     private void Update()
     {
         // Opcional: cualquier lógica de actualización
+    }
+
+    public Dictionary<ulong, GameObject> GetSpawnedPlayers()
+    {
+        return spawnedPlayers;
     }
 }

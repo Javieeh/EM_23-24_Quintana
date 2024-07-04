@@ -8,7 +8,7 @@ public class PlayerName : NetworkBehaviour
 {
     [SerializeField] private TextMeshProUGUI nameText; // Asigna un TextMesh para mostrar el nombre
 
-    private NetworkVariable<NetworkString> playerName = new NetworkVariable<NetworkString>(new NetworkString { info = new Unity.Collections.FixedString32Bytes("Player") });
+    public NetworkVariable<NetworkString> playerName = new NetworkVariable<NetworkString>(new NetworkString { info = new Unity.Collections.FixedString32Bytes("Player") });
 
     private void Start()
     {

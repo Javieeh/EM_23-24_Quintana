@@ -9,7 +9,7 @@ public class PlayerColor : NetworkBehaviour
     [SerializeField] private Material[] colors;
 
     private int currentColorIndex = 0;
-    private NetworkVariable<Color> playerColor = new NetworkVariable<Color>(Color.white);
+    public NetworkVariable<Color> playerColor = new NetworkVariable<Color>(Color.white);
 
     private void Start()
     {
@@ -43,7 +43,7 @@ public class PlayerColor : NetworkBehaviour
     }
 
     [ServerRpc]
-    private void ChangeColorServerRpc(Color newColor)
+    public void ChangeColorServerRpc(Color newColor)
     {
         playerColor.Value = newColor;
     }

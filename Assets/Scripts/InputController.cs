@@ -18,11 +18,16 @@ public class InputController : NetworkBehaviour
 
     public void OnMove(InputAction.CallbackContext context)
     {
-        if (IsOwner)
+        var input = context.ReadValue<Vector2>();
+
+        if (IsClient)
         {
-            var input = context.ReadValue<Vector2>();
             Debug.Log($"Cliente OnMove - Acceleration: {input.y}, Steering: {input.x}");
             SubmitMoveInputServerRpc(input.y, input.x);
+        } if (IsServer)
+        {
+            car.InputAcceleration.Value = input.y;
+            car.InputSteering.Value = input.x;
         }
     }
 
@@ -48,7 +53,7 @@ public class InputController : NetworkBehaviour
     private void SubmitMoveInputServerRpc(float acceleration, float steering)
     {
         Debug.Log($"Servidor SubmitMoveInputServerRpc - Acceleration: {acceleration}, Steering: {steering}");
-        if (car != null && car.IsServer)
+        if (car != null)
         {
             car.InputAcceleration.Value = acceleration;
             car.InputSteering.Value = steering;

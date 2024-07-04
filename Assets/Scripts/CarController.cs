@@ -68,7 +68,7 @@ public class CarController : NetworkBehaviour
 
     public void Awake()
     {
-        id = GetComponentInParent<Player>().id;
+        id = GetComponentInParent<Player>().ID.Value;
         projectileLife = 5;
         projectileSpeed = 80;
 
@@ -155,22 +155,19 @@ public class CarController : NetworkBehaviour
             float accelerationInput = Mathf.Clamp(Input.GetAxis("Vertical"), -1, 1);
             float brakeInput = Input.GetKey(KeyCode.Space) ? 1 : 0;
 
-            Debug.Log("Enviando inputs al servidor: " + NetworkManager.LocalClientId);
             SubmitInputsServerRpc(steeringInput, accelerationInput, brakeInput);
         }
         else
         {
-            Debug.Log("No es propietario o no está spawneado o no es cliente: " + NetworkManager.LocalClientId);
+            //Debug.Log("No es propietario o no está spawneado o no es cliente: " + NetworkManager.LocalClientId);
         }
     }
 
     [ServerRpc(RequireOwnership = false)]
     private void SubmitInputsServerRpc(float steering, float acceleration, float brake)
     {
-        Debug.Log("SubmitInputsServerRpc llamado en el servidor.");
         if (IsServer && IsSpawned)
         {
-            Debug.Log("Servidor recibiendo inputs: " + NetworkManager.LocalClientId);
             InputSteering.Value = steering;
             InputAcceleration.Value = acceleration;
             InputBrake.Value = brake;
@@ -189,7 +186,6 @@ public class CarController : NetworkBehaviour
         float acceleration = InputAcceleration.Value;
         float brake = InputBrake.Value;
 
-        Debug.Log($"FixedUpdate - Steering: {steering}, Acceleration: {acceleration}, Brake: {brake}");
 
         foreach (AxleInfo axleInfo in axleInfos)
         {
