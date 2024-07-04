@@ -8,28 +8,52 @@ public class RaceController : NetworkBehaviour
     public static RaceController Instance;
     public int numPlayers;
 
-    private readonly List<Player> _players = new(4);
+    public List<Player> _players = new(4);
+    public List<CheckpointManager> carCheckManagerList; // Lista de todos los CheckpointManagers de los coches
     private CircuitController _circuitController;
     private GameObject[] _debuggingSpheres;
     
     private void Start()
     {
         if (_circuitController == null) _circuitController = GetComponent<CircuitController>();
-
+        _players = new GameManager().GetPlayers();
         _debuggingSpheres = new GameObject[GameManager.Instance.numPlayers];
         for (int i = 0; i < GameManager.Instance.numPlayers; ++i)
         {
             _debuggingSpheres[i] = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             _debuggingSpheres[i].GetComponent<SphereCollider>().enabled = false;
         }
+        Debug.Log("Sigan viendo");
+            var aux = FindObjectsOfType<CheckpointManager>();
+            foreach (var item in aux){
+                carCheckManagerList.Add(item);
+                Debug.Log(item);
+            }
+            carCheckManagerList.Sort((a, b) =>
+            {
+                if (a.LapsCompleted.Value != b.LapsCompleted.Value)
+                    return b.LapsCompleted.Value.CompareTo(a.LapsCompleted.Value);
+
+                return b.CurrentCheckpoint.Value.CompareTo(a.CurrentCheckpoint.Value);
+            });
     }
 
     private void Update()
     {
-        if (_players.Count == 0)
-            return;
+        /*if (_players.Count == 0)
+            return;*/
+        if (!IsServer)
+        {
+            
+            Debug.Log(carCheckManagerList.Count);
+            // Enviar posiciones a todos los clientes
+            for (int i = 0; i < carCheckManagerList.Count; i++)
+            {
+                carCheckManagerList[i].GetComponentInChildren<CarController>().UpdatePositionClientRpc(i + 1);
+            }
 
         UpdateRaceProgress();
+        }
     }
 
     public void AddPlayer(Player player)
@@ -77,7 +101,7 @@ public class RaceController : NetworkBehaviour
         }
         for (int i = 0; i < _players.Count; i++){
             Player player = _players[i];
-            myRaceOrder += player.Name + " ";
+            myRaceOrder += player.ID + " ";
             //Actualizamos la UI
             UIManager.Instance.UpdatePlayerPosition(player.Name, i+1);
         }

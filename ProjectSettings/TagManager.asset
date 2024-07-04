@@ -11,6 +11,8 @@ TagManager:
   - StartPosition
   - NetworkPlayer
   - VirtualCamera
+  - Checkpoint
+  - posText
   layers:
   - Default
   - TransparentFX
