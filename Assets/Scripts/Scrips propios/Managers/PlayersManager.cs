@@ -219,6 +219,7 @@ public class PlayersManager : Singleton<PlayersManager>
             if (player.GetComponent<NetworkObject>().IsOwner)
             {
                 player.GetComponent<PlayerCamera>().enabled = true;
+                
             }
             player.GetComponentInChildren<CarController>().enabled = true;
             player.GetComponent<Player>().UpdatePlayerAttributesServerRpc();

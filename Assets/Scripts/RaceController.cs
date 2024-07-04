@@ -100,13 +100,6 @@ public class RaceController : NetworkBehaviour
         }
     }
 
-    [ServerRpc(RequireOwnership = false)]
-    private void UpdateRaceProgressServerRpc()
-    {
-
-        UpdateRaceProgress();
-    }
-
     public void UpdateRaceProgress()
     {
 
@@ -124,7 +117,7 @@ public class RaceController : NetworkBehaviour
             }
             try
             {
-                arcLengths[_players[i].ID.Value] = ComputeCarArcLength(i);
+                arcLengths[i] = ComputeCarArcLength(i);
             }
             catch (IndexOutOfRangeException)
             {

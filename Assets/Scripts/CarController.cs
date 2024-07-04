@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
 using UnityEngine.UI;
+using Unity.Netcode.Components;
 
 public class CarController : NetworkBehaviour
 {
@@ -26,7 +27,7 @@ public class CarController : NetworkBehaviour
     public NetworkVariable<float> InputSteering = new NetworkVariable<float>();
     public NetworkVariable<float> InputBrake = new NetworkVariable<float>();
 
-    private Rigidbody _rigidbody;
+    private NetworkRigidbody _rigidbody;
     private float _steerHelper = 0.8f;
 
     private bool isPenalized = false;
@@ -72,7 +73,7 @@ public class CarController : NetworkBehaviour
         projectileLife = 5;
         projectileSpeed = 80;
 
-        _rigidbody = GetComponent<Rigidbody>();
+        _rigidbody = GetComponent<NetworkRigidbody>();
         if (_rigidbody == null)
         {
             Debug.LogError("No Rigidbody found in children of Car.");
@@ -131,7 +132,7 @@ public class CarController : NetworkBehaviour
         //    enabled = true;
         //    Debug.Log("CarController activado en OnNetworkSpawn.");
         //}
-
+        
         if (IsServer)
         {
             InputSteering.Value = 0f;
@@ -147,7 +148,7 @@ public class CarController : NetworkBehaviour
 
     public void Update()
     {
-        Speed = _rigidbody.velocity.magnitude;
+        Speed = _rigidbody.gameObject.GetComponent<Rigidbody>().velocity.magnitude;
 
         if (IsOwner && IsSpawned && NetworkManager.Singleton.IsClient)
         {
@@ -252,7 +253,6 @@ public class CarController : NetworkBehaviour
     {
         if (_rigidbody == null)
         {
-            _rigidbody = GetComponentInChildren<Rigidbody>();
             if (_rigidbody == null)
             {
                 Debug.LogError("No Rigidbody found in children of Car.");
@@ -416,10 +416,10 @@ public class CarController : NetworkBehaviour
         Vector3 respawnPosition = lastRespawnInfo.respawnPoint.position;
         Quaternion respawnRotation = lastRespawnInfo.respawnPoint.rotation;
 
-        _rigidbody.position = respawnPosition;
-        _rigidbody.rotation = respawnRotation;
-        _rigidbody.velocity = Vector3.zero;
-        _rigidbody.angularVelocity = Vector3.zero;
+        _rigidbody.transform.position = respawnPosition;
+        _rigidbody.transform.rotation = respawnRotation;
+        _rigidbody.gameObject.GetComponent<Rigidbody>().velocity = Vector3.zero;
+        _rigidbody.gameObject.GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
     }
 
     #endregion
@@ -460,9 +460,9 @@ public class CarController : NetworkBehaviour
 
     private void SpeedLimiter()
     {
-        float speed = _rigidbody.velocity.magnitude;
+        float speed = _rigidbody.gameObject.GetComponent<Rigidbody>().velocity.magnitude;
         if (speed > topSpeed)
-            _rigidbody.velocity = topSpeed * _rigidbody.velocity.normalized;
+            _rigidbody.gameObject.GetComponent<Rigidbody>().velocity = topSpeed * _rigidbody.gameObject.GetComponent<Rigidbody>().velocity;
     }
 
     public void ApplyLocalPositionToVisuals(WheelCollider col)
@@ -499,7 +499,7 @@ public class CarController : NetworkBehaviour
         {
             var turnAdjust = (transform.eulerAngles.y - CurrentRotation) * _steerHelper;
             Quaternion velRotation = Quaternion.AngleAxis(turnAdjust, Vector3.up);
-            _rigidbody.velocity = velRotation * _rigidbody.velocity;
+            _rigidbody.gameObject.GetComponent<Rigidbody>().velocity = velRotation * _rigidbody.gameObject.GetComponent<Rigidbody>().velocity;
         }
 
         CurrentRotation = transform.eulerAngles.y;
