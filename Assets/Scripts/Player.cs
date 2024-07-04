@@ -144,6 +144,15 @@ public class Player : NetworkBehaviour
         // Incrementar el contador de destrucciones del jugador atacante
         IncrementarDestruccionesClientRpc(lastHitBy);
 
+        int cooldownTime = 10;
+        for (int i = cooldownTime; i > 0; i--)
+        {
+            ShowCooldownTextClientRpc(i);
+            yield return new WaitForSeconds(1);
+        }
+
+        HideCooldownTextClientRpc();
+
         yield return new WaitForSeconds(10);
 
         life.Value = 5; // Reiniciamos la vida para simplificar el ejemplo
@@ -210,6 +219,32 @@ public class Player : NetworkBehaviour
             {
                 Debug.LogError("UIManager.Instance is null.");
             }
+        }
+    }
+
+    [ClientRpc]
+    private void ShowCooldownTextClientRpc(int seconds)
+    {
+        if (IsOwner)
+        {
+            CombatGUI.Instance.ShowCooldownText(seconds);
+        }
+        else
+        {
+            Debug.LogError("UIManager.Instance is null.");
+        }
+    }
+
+    [ClientRpc]
+    private void HideCooldownTextClientRpc()
+    {
+        if (IsOwner)
+        {
+            CombatGUI.Instance.HideCooldownText();
+        }
+        else
+        {
+            Debug.LogError("UIManager.Instance is null.");
         }
     }
 }
