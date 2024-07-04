@@ -1,8 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 
-public class ProjectilCollision : MonoBehaviour
+public class ProjectilCollision : NetworkBehaviour
 {
     // Start is called before the first frame update
 
@@ -27,6 +28,14 @@ public class ProjectilCollision : MonoBehaviour
         {
             Debug.Log("Dado");
 
+            if (IsServer)
+            {
+                NetworkObject.Despawn();
+            }
+            else
+            {
+                RequestDespawnServerRpc();
+            }
             ////cogemos el componente de la vida de nuestro player y la reducimos en 1
             //other.GetComponentInParent<Player>().life--;
 
@@ -48,8 +57,19 @@ public class ProjectilCollision : MonoBehaviour
             //}
 
             ////Destruimos la bala para que no siga impactando 0.01 segundos despues para que se pueda realizar la coroutina
-            
-            Destroy(gameObject, timeHit + 0.01f);
+
+
+            //Destroy(gameObject, timeHit + 0.01f);
+        }
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    void RequestDespawnServerRpc()
+    {
+        var networkObject = GetComponent<NetworkObject>();
+        if (networkObject != null && networkObject.IsSpawned)
+        {
+            networkObject.Despawn();
         }
     }
 

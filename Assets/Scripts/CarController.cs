@@ -543,8 +543,12 @@ public class CarController : NetworkBehaviour
 
         projectile.AddComponent<ProjectilCollision>();
 
-        // Spawn the bullet on the network
-        projectile.GetComponent<NetworkObject>().Spawn();
+        // Ensure the bullet has NetworkObject component and is spawned
+        var networkObject = projectile.GetComponent<NetworkObject>();
+        if (networkObject != null)
+        {
+            networkObject.Spawn();
+        }
 
         Destroy(projectile, projectileLife);
         
