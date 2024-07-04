@@ -23,7 +23,7 @@ public class InputController : NetworkBehaviour
         if (!IsOwner) return;
         if (IsClient)
         {
-            Debug.Log($"Cliente OnMove - Acceleration: {input.y}, Steering: {input.x}");
+            //Debug.Log($"Cliente OnMove - Acceleration: {input.y}, Steering: {input.x}");
             MoveServerRpc(input.y, input.x);
         } if (IsServer)
         {
@@ -53,7 +53,7 @@ public class InputController : NetworkBehaviour
     [ServerRpc]
     private void MoveServerRpc(float acceleration, float steering)
     {
-        Debug.Log($"Servidor SubmitMoveInputServerRpc - Acceleration: {acceleration}, Steering: {steering}");
+        //Debug.Log($"Servidor SubmitMoveInputServerRpc - Acceleration: {acceleration}, Steering: {steering}");
         if (car != null)
         {
             car.InputAcceleration.Value = acceleration;

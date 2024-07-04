@@ -24,7 +24,9 @@ public class Player : NetworkBehaviour
     private Material originMaterial;
 
     // Vida del coche
-    public int life;
+    public NetworkVariable<int> life = new NetworkVariable<int>(5);
+
+    private Coroutine cooldownCoroutine;
 
     // Referencias a PlayerName y PlayerColor
     private PlayerName playerName;
@@ -37,7 +39,7 @@ public class Player : NetworkBehaviour
             // Aquí puedes inicializar los valores del jugador
             playerName = GetComponent<PlayerName>();
             playerColor = GetComponent<PlayerColor>();
-            
+
             if (playerName != null && playerColor != null)
             {
                 playerName.SetName("Player" + NetworkManager.Singleton.LocalClientId);
@@ -79,7 +81,7 @@ public class Player : NetworkBehaviour
 
     private void Start()
     {
-        life = 5;
+        life.Value = 5;
         numeroMuertes = 0;
         points = 0;
         isDie = false;
@@ -90,38 +92,25 @@ public class Player : NetworkBehaviour
 
     private void Update()
     {
-        if (life <= 0 && !isDie)
+        if (life.Value <= 0 && !isDie)
         {
             Debug.Log("jugador eliminado");
             numeroMuertes++;
-            isDieDie();
+            isDie = true;
+
+            // Iniciar cooldown para reactivar al jugador
+            if (cooldownCoroutine == null)
+            {
+                cooldownCoroutine = StartCoroutine(CooldownCoroutine());
+            }
         }
-    }
-
-    IEnumerator CountDown()
-    {
-        Debug.Log("cooldown...");
-        this.life = 5;
-        isDie = false;
-        yield return new WaitForSeconds(5);
-        this.transform.GetChild(0).transform.tag = "Player";
-    }
-
-    public void isDieDie()
-    {
-        isDie = true;
-        this.transform.GetChild(0).transform.tag = "Untagged";
-        originRender.material = originMaterial;
-
-        Debug.Log("Empezando cooldown");
-        StartCoroutine(CountDown());
     }
 
     [ServerRpc]
     public void UpdatePlayerAttributesServerRpc(ServerRpcParams rpcParams = default)
     {
         Name.Value = playerName.playerName.Value; ;
-        CarColor.Value = playerColor.playerColor.Value; 
+        CarColor.Value = playerColor.playerColor.Value;
         ID.Value = (int)GetComponent<NetworkObject>().OwnerClientId;
         ActualizarAtributosClientRpc();
     }
@@ -131,7 +120,7 @@ public class Player : NetworkBehaviour
     {
         Name.Value = playerName.playerName.Value;
         CarColor.Value = playerColor.playerColor.Value;
-        ID.Value = (int) GetComponent<NetworkObject>().OwnerClientId;
+        ID.Value = (int)GetComponent<NetworkObject>().OwnerClientId;
 
         this.gameObject.name = Name.Value;
         UpdateCarColor(CarColor.Value);
@@ -142,6 +131,45 @@ public class Player : NetworkBehaviour
         if (originRender != null)
         {
             originRender.material.color = color;
+        }
+    }
+
+    private IEnumerator CooldownCoroutine()
+    {
+        Debug.Log("Jugador eliminado. Iniciando cooldown de 10 segundos.");
+        SetPlayerTag(false);
+
+        yield return new WaitForSeconds(10);
+
+        life.Value = 5; // Reiniciamos la vida para simplificar el ejemplo
+        isDie = false;
+        SetPlayerTag(true);
+        cooldownCoroutine = null;
+
+        Debug.Log("Cooldown finalizado. Jugador reactivado.");
+    }
+
+    private void SetPlayerTag(bool isActive)
+    {
+        // Asignar o quitar la etiqueta "Player"
+        var playerTag = isActive ? "Player" : "Untagged";
+        transform.GetChild(0).tag = playerTag;
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void TakeDamageServerRpc(int damage)
+    {
+        if (!IsServer)
+            return;
+
+        life.Value -= damage;
+        Debug.Log($"Vida del jugador después del daño: {life.Value}");
+
+        if (life.Value <= 0)
+        {
+            // Aquí puedes manejar la destrucción del coche o el reset de vida
+            Debug.Log("Jugador eliminado");
+            life.Value = 0; // Reiniciamos la vida para simplificar el ejemplo
         }
     }
 }

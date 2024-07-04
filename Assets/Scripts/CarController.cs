@@ -77,12 +77,15 @@ public class CarController : NetworkBehaviour
         id = GetComponentInParent<Player>().ID.Value;
         projectileLife = 5;
         projectileSpeed = 80;
+        projectileSpawn = transform.GetChild(6);
+        projectilePrefab = projectilePrefab;
 
         _rigidbody = GetComponentInParent<NetworkRigidbody>();
         if (_rigidbody == null)
         {
             Debug.LogError("No Rigidbody found in children of Car.");
         }
+
     }
 
     //private void Start()
@@ -484,20 +487,6 @@ public class CarController : NetworkBehaviour
         CurrentRotation = transform.eulerAngles.y;
     }
 
-    public void Shoot()
-    {
-        GameObject projectile = Instantiate(projectilePrefab, projectileSpawn.position, projectileSpawn.rotation);
-        projectile.GetComponent<ProjectilCollision>().id = id;
-        Rigidbody rb = projectile.GetComponent<Rigidbody>();
-        if (rb != null)
-        {
-            rb.velocity = projectileSpawn.forward * projectileSpeed;
-        }
-        Destroy(projectile, projectileLife);
-        Debug.Log("Shooting from the car!");
-    }
-
-
     // Para empezar de forma sincronizada
     [ServerRpc]
     public void SetReadyServerRpc()
@@ -513,5 +502,64 @@ public class CarController : NetworkBehaviour
     }
 
     #endregion
+    #region SHOOTING
+    public void Shoot()
+    {
+        if (IsServer)
+        {
+            SpawnBullet();
+        }
+        else
+        {
+            SpawnBulletServerRpc();
+        }
+    }
+
+    [ServerRpc]
+    void SpawnBulletServerRpc()
+    {
+        SpawnBullet();
+    }
+
+    void SpawnBullet()
+    {
+        Debug.Log("Shooting from the car!");
+        GameObject projectile = Instantiate(projectilePrefab, projectileSpawn.position, projectileSpawn.rotation);
+        projectile.GetComponent<ProjectilCollision>().id = id;
+        Rigidbody rb = projectile.GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            rb.velocity = projectileSpawn.forward * projectileSpeed;
+        }
+
+        projectile.AddComponent<ProjectilCollision>();
+
+        // Ensure the bullet has NetworkObject component and is spawned
+        var networkObject = projectile.GetComponent<NetworkObject>();
+        if (networkObject != null)
+        {
+            networkObject.Spawn();
+        }
+
+        //Destroy(projectile, projectileLife);
+
+        StartCoroutine(DestroyBulletAfterTime(projectile, 2.0f));
+    }
+
+    private IEnumerator DestroyBulletAfterTime(GameObject bullet, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+
+        var networkObject = bullet.GetComponent<NetworkObject>();
+        if (networkObject != null && networkObject.IsSpawned)
+        {
+            networkObject.Despawn();
+        }
+    }
+
+
+    
+    #endregion
+    
 }
 #endregion
