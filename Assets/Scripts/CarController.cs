@@ -5,6 +5,7 @@ using UnityEngine;
 using Unity.Netcode;
 using UnityEngine.UI;
 using Unity.Netcode.Components;
+using TMPro;
 
 public class CarController : NetworkBehaviour
 {
@@ -30,6 +31,8 @@ public class CarController : NetworkBehaviour
 
     // Variables para comenzar sincronizados la carrera
     public NetworkVariable<bool> IsReady = new NetworkVariable<bool>(false);
+    public NetworkVariable<int> CountdownValue = new NetworkVariable<int>(0);
+    private TextMeshProUGUI countdownText;
     private bool raceStarted = false;
 
     private NetworkRigidbody _rigidbody;
@@ -140,7 +143,7 @@ public class CarController : NetworkBehaviour
         //    enabled = true;
         //    Debug.Log("CarController activado en OnNetworkSpawn.");
         //}
-        
+
         if (IsServer)
         {
             InputSteering.Value = 0f;
@@ -556,10 +559,18 @@ public class CarController : NetworkBehaviour
             networkObject.Despawn();
         }
     }
+    [ClientRpc]
+    public void UpdateCountdownClientRpc(int value)
+    {
+        CountdownValue.Value = value;
+        if (countdownText != null)
+        {
+            countdownText.text = CountdownValue.Value > 0 ? CountdownValue.Value.ToString() : "GO!";
+        }
+    }
 
 
-    
     #endregion
-    
+
 }
 #endregion

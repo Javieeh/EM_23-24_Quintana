@@ -3,8 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using TMPro;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.Networking;
 
 public class RaceController : NetworkBehaviour
@@ -12,13 +14,21 @@ public class RaceController : NetworkBehaviour
     public static RaceController Instance;
     public int numPlayers;
 
-    public CountdownEvent startCountdown;
+    private NetworkVariable<int> countdown = new NetworkVariable<int>(0);
 
     [SerializeField]
     private List<Player> _players = new List<Player>();
+    List<CarController> listCarContr;
+    // salida sincr
+    public NetworkVariable<bool> raceStarted = new NetworkVariable<bool>(false); //para comprobar si la partida se ha iniciado
+    public NetworkVariable<float> remainingTime = new NetworkVariable<float>(5); //tiempo restante que queda para la salida
     private CircuitController _circuitController;
     private GameObject[] _debuggingSpheres;
+    public GameObject countDownNUM;
+    public GameObject startUI_GO;
+    
 
+    public TextMeshProUGUI textCountdown;
     private void Awake()
     {
         if (Instance == null)
@@ -30,12 +40,12 @@ public class RaceController : NetworkBehaviour
         {
             Destroy(gameObject);
         }
-        if(IsServer)GetComponent<NetworkObject>().Spawn();
+        if (IsServer) GetComponent<NetworkObject>().Spawn();
     }
 
     private void Start()
     {
-        if (IsServer) StartCoroutine(CheckAllPlayersReady());
+        /*if (IsServer) StartCoroutine(CheckAllPlayersReady());*/
 
         if (_circuitController == null) _circuitController = GetComponent<CircuitController>();
 
@@ -56,15 +66,19 @@ public class RaceController : NetworkBehaviour
                 AddPlayer(player);
             }
         }
+        startUI_GO = GameObject.Find("StartGameUI");
+        countDownNUM = GameObject.Find("Dynamic");
+        textCountdown = countDownNUM.GetComponent<TextMeshProUGUI>();
+        textCountdown.text = "5";
     }
 
     private void Update()
     {
+        UpdateRemainingTime();
         if (!IsServer)
         {
             return;
         }
-
         if (_players.Count == 0)
             return;
 
@@ -170,29 +184,63 @@ public class RaceController : NetworkBehaviour
     }
 
     // FUNCION QUE DA COMIENZO A LA CARRERA DE FORMA SINCRONIZADA
-    private IEnumerator CheckAllPlayersReady()
+    /*private IEnumerator CheckAllPlayersReady()
     {
-        List<CarController> carControllers = new List<CarController>();
+        listCarContr = new List<CarController>();
         foreach (var player in _players)
         {
-            carControllers.Add(player.GetComponentInChildren<CarController>());
+            listCarContr.Add(player.GetComponentInChildren<CarController>());
         }
         while (true)
         {
 
-            if (carControllers.All(CarController => CarController.IsReady.Value))
+            if (listCarContr.All(CarController => CarController.IsReady.Value))
             {
-                StartRace(carControllers);
+                StartCoroutine(StartCountdown(listCarContr));
                 yield break;
             }
             yield return new WaitForSeconds(.5f); // Esperar un segundo antes de volver a comprobar
         }
-    }
-    private void StartRace(List<CarController> listCarContr)
+    }*/
+    
+    private void StartRace(List<CarController> listCarCMethod)
     {
-        foreach (var carContr in listCarContr)
+        foreach (var carContr in listCarCMethod)
         {
             carContr.StartRaceClientRpc();
+        }
+    }
+    
+    public void UpdateRemainingTime()
+    {
+        
+        //si el tiempo restante es 0 entonces la carrera empieza
+        if (remainingTime.Value == 0)
+        {
+            Debug.Log("EMPIEZA LA CARRERA");            
+            startUI_GO.SetActive(false);
+            //Se le activa el input al jugador una vez haya terminado el tiempo de espera para que se pueda comenzar a mover
+            ActivateInput();
+        }
+        else
+        {
+            Debug.Log("AUN NO EMPIEZA....");
+            remainingTime.Value -= Time.deltaTime; //se va restando el tiempo al contador de tiempo restante
+            textCountdown.text = remainingTime.Value.ToString();
+            if (remainingTime.Value < 0) //si el tiempo restante es menos que 0
+            {
+                remainingTime.Value = 0; //se asigna que sea directamente 0 para que sea más sencillo realizar comprobaciones
+                textCountdown.text = remainingTime.Value.ToString();
+            }
+            //Debug.Log(remainingTime.Value);
+        }
+
+    }
+    public void ActivateInput()
+    {
+        foreach(Player player in _players){
+            var rigido = player.GetComponentInChildren<Rigidbody>();
+            rigido.isKinematic = false;
         }
     }
 

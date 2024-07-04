@@ -11,7 +11,6 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance { get; private set; }
 
     public List<Player> players = new List<Player>();
-    private CountdownText countdownText;
     
 
 
@@ -28,8 +27,7 @@ public class GameManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
-        countdownText = FindAnyObjectByType<CountdownText>();
-        StartCoroutine(StartCountDown());
+       //StartCoroutine(StartCountDown());
     }
 
     public void AddPlayer(Player player)
@@ -41,7 +39,7 @@ public class GameManager : MonoBehaviour
     {
         return players;
     }
-    private IEnumerator StartCountDown(){
+    /*private IEnumerator StartCountDown(){
         bool stop = true;
         // Hacemos estaticos a los jugadores
         foreach (Player player in players) player.GetComponentInChildren<Rigidbody>().isKinematic = true;
@@ -51,5 +49,5 @@ public class GameManager : MonoBehaviour
             // Y devuelve true si pueden salir
         }
         foreach (Player player in players) player.GetComponentInChildren<Rigidbody>().isKinematic = false;
-    }
+    }*/
 }
