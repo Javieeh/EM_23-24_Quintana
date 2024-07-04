@@ -1,5 +1,8 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -8,6 +11,8 @@ public class RaceController : NetworkBehaviour
 {
     public static RaceController Instance;
     public int numPlayers;
+
+    public CountdownEvent startCountdown;
 
     [SerializeField]
     private List<Player> _players = new List<Player>();
@@ -30,6 +35,8 @@ public class RaceController : NetworkBehaviour
 
     private void Start()
     {
+        if (IsServer) StartCoroutine(CheckAllPlayersReady());
+
         if (_circuitController == null) _circuitController = GetComponent<CircuitController>();
 
         _debuggingSpheres = new GameObject[PlayersManager.Instance.PlayersInGame];
@@ -137,12 +144,6 @@ public class RaceController : NetworkBehaviour
         Debug.Log("Race order: " + myRaceOrder);
     }
 
-    [ClientRpc]
-    private void UpdateRaceOrderClientRpc(string raceOrder)
-    {
-        Debug.Log("Client Race order: " + raceOrder);
-    }
-
     float ComputeCarArcLength(int id)
     {
         // Compute the projection of the car position to the closest circuit 
@@ -167,4 +168,32 @@ public class RaceController : NetworkBehaviour
 
         return minArcL;
     }
+
+    // FUNCION QUE DA COMIENZO A LA CARRERA DE FORMA SINCRONIZADA
+    private IEnumerator CheckAllPlayersReady()
+    {
+        List<CarController> carControllers = new List<CarController>();
+        foreach (var player in _players)
+        {
+            carControllers.Add(player.GetComponentInChildren<CarController>());
+        }
+        while (true)
+        {
+
+            if (carControllers.All(CarController => CarController.IsReady.Value))
+            {
+                StartRace(carControllers);
+                yield break;
+            }
+            yield return new WaitForSeconds(.5f); // Esperar un segundo antes de volver a comprobar
+        }
+    }
+    private void StartRace(List<CarController> listCarContr)
+    {
+        foreach (var carContr in listCarContr)
+        {
+            carContr.StartRaceClientRpc();
+        }
+    }
+
 }

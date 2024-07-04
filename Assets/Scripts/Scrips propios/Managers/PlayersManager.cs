@@ -17,6 +17,7 @@ public class PlayersManager : Singleton<PlayersManager>
     private int readyPlayersCount = 0; // Conteo de jugadores listos
     private Dictionary<ulong, GameObject> spawnedPlayers = new Dictionary<ulong, GameObject>();
 
+    public Rigidbody rigidToSpeed;
     [SerializeField] private GameObject prefab;
     [SerializeField] private int countdownTime = 3; // Tiempo de cuenta atrás en segundos
 
@@ -287,5 +288,21 @@ public class PlayersManager : Singleton<PlayersManager>
     public Dictionary<ulong, GameObject> GetSpawnedPlayers()
     {
         return spawnedPlayers;
+    }
+
+    public Rigidbody GetRB()
+    {
+        GameObject[] players = GameObject.FindGameObjectsWithTag("NetworkPlayer");
+
+        foreach (var player in players)
+        {
+            if (player.GetComponent<NetworkObject>().IsOwner)
+            {
+
+                return player.GetComponentInChildren<Rigidbody>();
+            }
+        }
+        Debug.Log("Devuelve nulo");
+        return null;
     }
 }

@@ -26,6 +26,11 @@ public class CarController : NetworkBehaviour
     public NetworkVariable<float> InputAcceleration = new NetworkVariable<float>();
     public NetworkVariable<float> InputSteering = new NetworkVariable<float>();
     public NetworkVariable<float> InputBrake = new NetworkVariable<float>();
+    public NetworkVariable<int> Position = new NetworkVariable<int>(); // Posicion respecto a los demas jugadores
+
+    // Variables para comenzar sincronizados la carrera
+    public NetworkVariable<bool> IsReady = new NetworkVariable<bool>(false);
+    private bool raceStarted = false;
 
     private NetworkRigidbody _rigidbody;
     private float _steerHelper = 0.8f;
@@ -38,7 +43,7 @@ public class CarController : NetworkBehaviour
     private CheckpointManager checkpointManager;
     private LapTimeController lapTimeController;
 
-    public float _currentSpeed = 0;
+    public NetworkVariable<float> _currentSpeed = new NetworkVariable<float>();
     private bool validReset = false;
 
     public int id;
@@ -48,14 +53,14 @@ public class CarController : NetworkBehaviour
     public float projectileSpeed;
     public float projectileLife;
 
-    private float Speed
+    public NetworkVariable<float> Speed
     {
         get => _currentSpeed;
         set
         {
-            if (Math.Abs(_currentSpeed - value) < float.Epsilon) return;
+            if (Math.Abs(_currentSpeed.Value - value.Value) < float.Epsilon) return;
             _currentSpeed = value;
-            OnSpeedChangeEvent?.Invoke(_currentSpeed);
+            OnSpeedChangeEvent?.Invoke(_currentSpeed.Value);
         }
     }
 
@@ -73,7 +78,7 @@ public class CarController : NetworkBehaviour
         projectileLife = 5;
         projectileSpeed = 80;
 
-        _rigidbody = GetComponent<NetworkRigidbody>();
+        _rigidbody = GetComponentInParent<NetworkRigidbody>();
         if (_rigidbody == null)
         {
             Debug.LogError("No Rigidbody found in children of Car.");
@@ -148,7 +153,7 @@ public class CarController : NetworkBehaviour
 
     public void Update()
     {
-        Speed = _rigidbody.gameObject.GetComponent<Rigidbody>().velocity.magnitude;
+        Speed.Value = _rigidbody.GetComponent<Rigidbody>().velocity.magnitude;
 
         if (IsOwner && IsSpawned && NetworkManager.Singleton.IsClient)
         {
@@ -186,7 +191,6 @@ public class CarController : NetworkBehaviour
         float steering = maxSteeringAngle * InputSteering.Value;
         float acceleration = InputAcceleration.Value;
         float brake = InputBrake.Value;
-
 
         foreach (AxleInfo axleInfo in axleInfos)
         {
@@ -335,31 +339,6 @@ public class CarController : NetworkBehaviour
             if (respawnInfo != null)
             {
                 SetLastRespawnInfo(respawnInfo);
-            }
-        }
-
-        Checkpoint checkpoint = other.GetComponent<Checkpoint>();
-        if (checkpoint != null && checkpointManager != null)
-        {
-            if (checkpoint.gameObject.name == "CheckPoint 0" && !validReset)
-            {
-                Debug.Log("No es valido, lo pongo true para la próxima");
-                validReset = true;
-            }
-            checkpointManager.CheckpointReached(checkpoint);
-        }
-
-        if (other.CompareTag("Finish") && checkpointManager != null)
-        {
-            checkpointManager.FinishLineReached();
-            if (!validReset)
-            {
-                // Si no es valido, NO hago nada                
-            }
-            if (validReset)
-            {
-                Debug.Log("Reinicio");
-                lapTimeController.StartNewLap();
             }
         }
     }
@@ -516,6 +495,21 @@ public class CarController : NetworkBehaviour
         }
         Destroy(projectile, projectileLife);
         Debug.Log("Shooting from the car!");
+    }
+
+
+    // Para empezar de forma sincronizada
+    [ServerRpc]
+    public void SetReadyServerRpc()
+    {
+        IsReady.Value = true;
+    }
+
+    [ClientRpc]
+    public void StartRaceClientRpc()
+    {
+        raceStarted = true;
+        // Habilitar controles del coche u otras acciones necesarias para iniciar la carrera
     }
 
     #endregion
