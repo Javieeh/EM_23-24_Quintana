@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using TMPro;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 
@@ -226,6 +227,7 @@ public class PlayersManager : Singleton<PlayersManager>
                 
             }
             player.GetComponentInChildren<CarController>().enabled = true;
+            player.GetComponentInChildren<PlayerInput>().enabled = true;
             player.GetComponentInChildren<InputController>().enabled = true;
             player.GetComponent<Player>().UpdatePlayerAttributesServerRpc();
 
