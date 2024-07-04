@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657874, g: 0.49641275, b: 0.5748171, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -168,7 +168,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f93fc7e8e749d44fb8fa929d02c8c0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  checkpointID: 0
+  CheckpointNumber: 0
 --- !u!65 &10048138
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -235,7 +235,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f93fc7e8e749d44fb8fa929d02c8c0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  checkpointID: 0
+  CheckpointNumber: 0
 --- !u!65 &36563068
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -302,7 +302,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f93fc7e8e749d44fb8fa929d02c8c0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  checkpointID: 0
+  CheckpointNumber: 0
 --- !u!65 &46970294
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -369,7 +369,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f93fc7e8e749d44fb8fa929d02c8c0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  checkpointID: 0
+  CheckpointNumber: 0
 --- !u!65 &47216337
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -913,7 +913,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f93fc7e8e749d44fb8fa929d02c8c0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  checkpointID: 0
+  CheckpointNumber: 0
 --- !u!65 &347819854
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -980,7 +980,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f93fc7e8e749d44fb8fa929d02c8c0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  checkpointID: 0
+  CheckpointNumber: 0
 --- !u!65 &350890278
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1047,7 +1047,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f93fc7e8e749d44fb8fa929d02c8c0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  checkpointID: 0
+  CheckpointNumber: 0
 --- !u!65 &354646457
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1386,7 +1386,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f93fc7e8e749d44fb8fa929d02c8c0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  checkpointID: 0
+  CheckpointNumber: 0
 --- !u!65 &437642244
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1588,7 +1588,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f93fc7e8e749d44fb8fa929d02c8c0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  checkpointID: 0
+  CheckpointNumber: 0
 --- !u!65 &507871889
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1655,7 +1655,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f93fc7e8e749d44fb8fa929d02c8c0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  checkpointID: 0
+  CheckpointNumber: 0
 --- !u!65 &512734221
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1722,7 +1722,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f93fc7e8e749d44fb8fa929d02c8c0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  checkpointID: 0
+  CheckpointNumber: 0
 --- !u!65 &517082777
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1779,6 +1779,7 @@ MonoBehaviour:
   - {fileID: 657533380}
   - {fileID: 1382288032}
   - {fileID: 1322049425}
+  rigidToSpeed: {fileID: 0}
   prefab: {fileID: 9136079542055615851, guid: f07b00722a0b8e84b8668a75094c1e5e, type: 3}
   countdownTime: 3
   projectilePrefab: {fileID: 3368144654654281369, guid: 0f06beb20a2bfbf4f9337f98a8facd77, type: 3}
@@ -2035,7 +2036,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f93fc7e8e749d44fb8fa929d02c8c0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  checkpointID: 0
+  CheckpointNumber: 0
 --- !u!65 &606760036
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -2242,7 +2243,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f93fc7e8e749d44fb8fa929d02c8c0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  checkpointID: 0
+  CheckpointNumber: 0
 --- !u!65 &631855516
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -2628,7 +2629,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f93fc7e8e749d44fb8fa929d02c8c0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  checkpointID: 0
+  CheckpointNumber: 0
 --- !u!65 &691596150
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -2667,7 +2668,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f93fc7e8e749d44fb8fa929d02c8c0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  checkpointID: 0
+  CheckpointNumber: 0
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
@@ -2912,7 +2913,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f93fc7e8e749d44fb8fa929d02c8c0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  checkpointID: 0
+  CheckpointNumber: 0
 --- !u!65 &803203684
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -3107,7 +3108,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f93fc7e8e749d44fb8fa929d02c8c0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  checkpointID: 0
+  CheckpointNumber: 0
 --- !u!65 &871958236
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -3301,7 +3302,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f93fc7e8e749d44fb8fa929d02c8c0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  checkpointID: 0
+  CheckpointNumber: 0
 --- !u!65 &986853956
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -3618,7 +3619,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f93fc7e8e749d44fb8fa929d02c8c0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  checkpointID: 0
+  CheckpointNumber: 0
 --- !u!65 &1098706295
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -3959,7 +3960,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f93fc7e8e749d44fb8fa929d02c8c0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  checkpointID: 0
+  CheckpointNumber: 0
 --- !u!65 &1211410528
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -4162,7 +4163,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f93fc7e8e749d44fb8fa929d02c8c0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  checkpointID: 0
+  CheckpointNumber: 0
 --- !u!65 &1291115123
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -4295,44 +4296,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 26bfb6c0ae22a5643b3df0be572e1a15, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  checkpoints:
-  - {fileID: 1567753426}
-  - {fileID: 1759213399}
-  - {fileID: 2054565045}
-  - {fileID: 517082776}
-  - {fileID: 347819853}
-  - {fileID: 1427198730}
-  - {fileID: 691596149}
-  - {fileID: 2111188784}
-  - {fileID: 2127229183}
-  - {fileID: 606760035}
-  - {fileID: 631855515}
-  - {fileID: 2062386107}
-  - {fileID: 1291115122}
-  - {fileID: 2071235812}
-  - {fileID: 437642243}
-  - {fileID: 1464975299}
-  - {fileID: 46970293}
-  - {fileID: 1560296086}
-  - {fileID: 1930727880}
-  - {fileID: 512734220}
-  - {fileID: 1098706294}
-  - {fileID: 986853955}
-  - {fileID: 1211410527}
-  - {fileID: 2009406766}
-  - {fileID: 507871888}
-  - {fileID: 354646456}
-  - {fileID: 1380844747}
-  - {fileID: 1919081790}
-  - {fileID: 871958235}
-  - {fileID: 10048137}
-  - {fileID: 350890277}
-  - {fileID: 803203683}
-  - {fileID: 47216336}
-  - {fileID: 1866123749}
-  - {fileID: 36563067}
-  - {fileID: 1776538184}
-  totalLaps: 3
+  CurrentCheckpoint:
+    m_InternalValue: 0
+  LapsCompleted:
+    m_InternalValue: 0
 --- !u!1 &1380844745
 GameObject:
   m_ObjectHideFlags: 0
@@ -4378,7 +4345,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f93fc7e8e749d44fb8fa929d02c8c0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  checkpointID: 0
+  CheckpointNumber: 0
 --- !u!65 &1380844748
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -4490,6 +4457,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   numPlayers: 0
+  _players: []
 --- !u!1 &1419372476
 GameObject:
   m_ObjectHideFlags: 0
@@ -4775,7 +4743,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f93fc7e8e749d44fb8fa929d02c8c0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  checkpointID: 0
+  CheckpointNumber: 0
 --- !u!65 &1427198731
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -4842,7 +4810,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f93fc7e8e749d44fb8fa929d02c8c0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  checkpointID: 0
+  CheckpointNumber: 0
 --- !u!65 &1464975300
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -4935,7 +4903,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d974d2fd8f289b646a6bebef1817abdf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  player: {fileID: 0}
+  muertesText: {fileID: 213913154}
 --- !u!1 &1560296084
 GameObject:
   m_ObjectHideFlags: 0
@@ -4981,7 +4949,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f93fc7e8e749d44fb8fa929d02c8c0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  checkpointID: 0
+  CheckpointNumber: 0
 --- !u!65 &1560296087
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -5334,7 +5302,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f93fc7e8e749d44fb8fa929d02c8c0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  checkpointID: 0
+  CheckpointNumber: 0
 --- !u!65 &1567753427
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -5785,7 +5753,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f93fc7e8e749d44fb8fa929d02c8c0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  checkpointID: 0
+  CheckpointNumber: 0
 --- !u!65 &1759213400
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -5852,7 +5820,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f93fc7e8e749d44fb8fa929d02c8c0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  checkpointID: 0
+  CheckpointNumber: 0
 --- !u!65 &1776538185
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -6275,7 +6243,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f93fc7e8e749d44fb8fa929d02c8c0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  checkpointID: 0
+  CheckpointNumber: 0
 --- !u!65 &1866123750
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -6342,7 +6310,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f93fc7e8e749d44fb8fa929d02c8c0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  checkpointID: 0
+  CheckpointNumber: 0
 --- !u!65 &1919081791
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -6409,7 +6377,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f93fc7e8e749d44fb8fa929d02c8c0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  checkpointID: 0
+  CheckpointNumber: 0
 --- !u!65 &1930727881
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -6649,7 +6617,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f93fc7e8e749d44fb8fa929d02c8c0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  checkpointID: 0
+  CheckpointNumber: 0
 --- !u!65 &2009406767
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -6763,7 +6731,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f93fc7e8e749d44fb8fa929d02c8c0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  checkpointID: 0
+  CheckpointNumber: 0
 --- !u!1 &2061401121
 GameObject:
   m_ObjectHideFlags: 0
@@ -6944,7 +6912,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f93fc7e8e749d44fb8fa929d02c8c0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  checkpointID: 0
+  CheckpointNumber: 0
 --- !u!65 &2062386108
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -7011,7 +6979,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f93fc7e8e749d44fb8fa929d02c8c0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  checkpointID: 0
+  CheckpointNumber: 0
 --- !u!65 &2071235813
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -7101,7 +7069,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f93fc7e8e749d44fb8fa929d02c8c0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  checkpointID: 0
+  CheckpointNumber: 0
 --- !u!65 &2111188785
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -7168,7 +7136,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f93fc7e8e749d44fb8fa929d02c8c0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  checkpointID: 0
+  CheckpointNumber: 0
 --- !u!65 &2127229184
 BoxCollider:
   m_ObjectHideFlags: 0

@@ -138,7 +138,7 @@ public class Player : NetworkBehaviour
     {
         Debug.Log("Jugador eliminado. Iniciando cooldown de 10 segundos.");
         SetPlayerTag(false);
-
+        IncrementarMuertesClientRpc();
         yield return new WaitForSeconds(10);
 
         life.Value = 5; // Reiniciamos la vida para simplificar el ejemplo
@@ -170,6 +170,19 @@ public class Player : NetworkBehaviour
             // Aquí puedes manejar la destrucción del coche o el reset de vida
             Debug.Log("Jugador eliminado");
             life.Value = 0; // Reiniciamos la vida para simplificar el ejemplo
+        }
+    }
+
+    [ClientRpc]
+    private void IncrementarMuertesClientRpc()
+    {
+        if (IsOwner)
+        {
+            CombatGUI.Instance.IncrementarMuertes();
+        }
+        else
+        {
+            Debug.LogError("UIManager.Instance is null.");
         }
     }
 }
