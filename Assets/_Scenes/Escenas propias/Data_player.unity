@@ -1673,6 +1673,7 @@ MonoBehaviour:
   - {fileID: 740647851}
   prefab: {fileID: 2709254396008256606, guid: 8cb0f194315f5874797b12dac7f6cdfb, type: 3}
   countdownTime: 3
+  projectilePrefab: {fileID: 3193896129032977642, guid: 0f06beb20a2bfbf4f9337f98a8facd77, type: 3}
 --- !u!1 &659604845
 GameObject:
   m_ObjectHideFlags: 0

@@ -21,7 +21,7 @@ public class InputController : NetworkBehaviour
         if (IsOwner)
         {
             var input = context.ReadValue<Vector2>();
-            Debug.Log($"Cliente OnMove - Acceleration: {input.y}, Steering: {input.x}");
+            //Debug.Log($"Cliente OnMove - Acceleration: {input.y}, Steering: {input.x}");
             SubmitMoveInputServerRpc(input.y, input.x);
         }
     }
@@ -31,7 +31,7 @@ public class InputController : NetworkBehaviour
         if (IsOwner)
         {
             var input = context.ReadValue<float>();
-            Debug.Log($"Cliente OnBrake - Brake: {input}");
+            //Debug.Log($"Cliente OnBrake - Brake: {input}");
             SubmitBrakeInputServerRpc(input);
         }
     }

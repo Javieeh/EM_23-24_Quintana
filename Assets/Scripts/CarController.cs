@@ -25,6 +25,7 @@ public class CarController : NetworkBehaviour
     public NetworkVariable<float> InputAcceleration = new NetworkVariable<float>();
     public NetworkVariable<float> InputSteering = new NetworkVariable<float>();
     public NetworkVariable<float> InputBrake = new NetworkVariable<float>();
+    
 
     private Rigidbody _rigidbody;
     private float _steerHelper = 0.8f;
@@ -71,6 +72,8 @@ public class CarController : NetworkBehaviour
         id = GetComponentInParent<Player>().id;
         projectileLife = 5;
         projectileSpeed = 80;
+        projectileSpawn = transform.GetChild(6);
+        projectilePrefab = projectilePrefab;
 
         _rigidbody = GetComponent<Rigidbody>();
         if (_rigidbody == null)
@@ -155,29 +158,29 @@ public class CarController : NetworkBehaviour
             float accelerationInput = Mathf.Clamp(Input.GetAxis("Vertical"), -1, 1);
             float brakeInput = Input.GetKey(KeyCode.Space) ? 1 : 0;
 
-            Debug.Log("Enviando inputs al servidor: " + NetworkManager.LocalClientId);
+            //Debug.Log("Enviando inputs al servidor: " + NetworkManager.LocalClientId);
             SubmitInputsServerRpc(steeringInput, accelerationInput, brakeInput);
         }
         else
         {
-            Debug.Log("No es propietario o no está spawneado o no es cliente: " + NetworkManager.LocalClientId);
+            //Debug.Log("No es propietario o no está spawneado o no es cliente: " + NetworkManager.LocalClientId);
         }
     }
 
     [ServerRpc(RequireOwnership = false)]
     private void SubmitInputsServerRpc(float steering, float acceleration, float brake)
     {
-        Debug.Log("SubmitInputsServerRpc llamado en el servidor.");
+        //Debug.Log("SubmitInputsServerRpc llamado en el servidor.");
         if (IsServer && IsSpawned)
         {
-            Debug.Log("Servidor recibiendo inputs: " + NetworkManager.LocalClientId);
+            //Debug.Log("Servidor recibiendo inputs: " + NetworkManager.LocalClientId);
             InputSteering.Value = steering;
             InputAcceleration.Value = acceleration;
             InputBrake.Value = brake;
         }
         else
         {
-            Debug.LogWarning("Intento de escritura de cliente detectado en SubmitInputsServerRpc: " + NetworkManager.LocalClientId);
+            //Debug.LogWarning("Intento de escritura de cliente detectado en SubmitInputsServerRpc: " + NetworkManager.LocalClientId);
         }
     }
 
@@ -189,7 +192,7 @@ public class CarController : NetworkBehaviour
         float acceleration = InputAcceleration.Value;
         float brake = InputBrake.Value;
 
-        Debug.Log($"FixedUpdate - Steering: {steering}, Acceleration: {acceleration}, Brake: {brake}");
+        //Debug.Log($"FixedUpdate - Steering: {steering}, Acceleration: {acceleration}, Brake: {brake}");
 
         foreach (AxleInfo axleInfo in axleInfos)
         {
@@ -511,6 +514,25 @@ public class CarController : NetworkBehaviour
 
     public void Shoot()
     {
+        if (IsServer)
+        {
+            SpawnBullet();
+        }
+        else
+        {
+            SpawnBulletServerRpc();
+        }
+    }
+
+    [ServerRpc]
+    void SpawnBulletServerRpc()
+    {
+        SpawnBullet();
+    }
+
+    void SpawnBullet()
+    {
+        Debug.Log("Shooting from the car!");
         GameObject projectile = Instantiate(projectilePrefab, projectileSpawn.position, projectileSpawn.rotation);
         projectile.GetComponent<ProjectilCollision>().id = id;
         Rigidbody rb = projectile.GetComponent<Rigidbody>();
@@ -518,8 +540,14 @@ public class CarController : NetworkBehaviour
         {
             rb.velocity = projectileSpawn.forward * projectileSpeed;
         }
+
+        projectile.AddComponent<ProjectilCollision>();
+
+        // Spawn the bullet on the network
+        projectile.GetComponent<NetworkObject>().Spawn();
+
         Destroy(projectile, projectileLife);
-        Debug.Log("Shooting from the car!");
+        
     }
 
     #endregion

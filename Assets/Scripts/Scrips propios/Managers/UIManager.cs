@@ -64,7 +64,7 @@ public class UIManager : Singleton<UIManager>
         positions = positionText;
         if (playerIndex <= totalPlayers)
         {
-            positions.text = $"{playerIndex + 1}/{totalPlayers}";
+            //positions.text = $"{playerIndex + 1}/{totalPlayers}";
         }
     }
     // Start is called before the first frame update

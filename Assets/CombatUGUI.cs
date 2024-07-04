@@ -32,7 +32,7 @@ public class CombatGUI : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        numDestruidos.text = player.points.ToString();
-        numMuertes.text = player.numeroMuertes.ToString();
+        //numDestruidos.text = player.points.ToString();
+        //numMuertes.text = player.numeroMuertes.ToString();
     }
 }

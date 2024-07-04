@@ -19,6 +19,8 @@ public class PlayersManager : Singleton<PlayersManager>
     [SerializeField] private GameObject prefab;
     [SerializeField] private int countdownTime = 3; // Tiempo de cuenta atrás en segundos
 
+    public GameObject projectilePrefab;
+
     public int PlayersInGame
     {
         get
@@ -84,6 +86,7 @@ public class PlayersManager : Singleton<PlayersManager>
 
         // Instancia el jugador en la posición del placeholder y con la rotación predeterminada
         GameObject player = Instantiate(playerPrefab, spawnPosition, spawnPoint.rotation);
+        player.transform.GetChild(0).GetComponent<CarController>().projectilePrefab = projectilePrefab;
         NetworkObject networkObject = player.GetComponent<NetworkObject>();
 
         if (networkObject == null)
