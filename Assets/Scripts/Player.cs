@@ -105,6 +105,17 @@ public class Player : NetworkBehaviour
                 cooldownCoroutine = StartCoroutine(CooldownCoroutine());
             }
         }
+        UpdatePlayerPositionsClientRpc();
+    }
+    [ClientRpc]
+    private void UpdatePlayerPositionsClientRpc()
+    {
+        if (IsOwner)
+        {
+            Debug.Log("Player " + ID.Value + " ENTRA");
+            UIManager.Instance.UpdateAllPlayerPositions(CurrentPosition.Value, PlayersManager.Instance.PlayersInGame);
+        }
+
     }
 
     [ServerRpc]

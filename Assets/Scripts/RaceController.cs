@@ -60,11 +60,14 @@ public class RaceController : NetworkBehaviour
             }
         }
 
-        
+        //Aqui acceden todos los clientes
+
     }
 
     private void Update()
     {
+        //UpdatePlayerPositionsClientRpc();
+
         if (!IsServer)
         {
             return;
@@ -74,6 +77,13 @@ public class RaceController : NetworkBehaviour
             return;
 
         UpdateRaceProgress();
+
+    }
+
+    private void FixedUpdate()
+    {
+        //UpdatePlayerPositions();
+
     }
 
     public void AddPlayer(Player player)
@@ -151,19 +161,26 @@ public class RaceController : NetworkBehaviour
         }
 
         // Notifica a todos los clientes para actualizar la interfaz
-        UpdatePlayerPositionsClientRpc();
+        //UpdatePlayerPositions();
     }
 
-    [ClientRpc]
-    private void UpdatePlayerPositionsClientRpc()
-    {
-        foreach (var player in _players)
-        {
-            Debug.Log("Player "+ player.ID.Value + " ENTRA");
-            if(player.IsOwner) UIManager.Instance.UpdateAllPlayerPositions(player.CurrentPosition.Value, _players.Count);
-            
-        }
-    }
+    //[ClientRpc]
+    //private void UpdatePlayerPositionsClientRpc()
+    //{
+    //    GameObject[] playersGameoBjects;
+    //    playersGameoBjects = GameObject.FindGameObjectsWithTag("NetworkPlayer");
+
+    //    foreach (var player in playersGameoBjects)
+    //    {
+    //        NetworkObject networkObject = player.GetComponent<NetworkObject>();
+
+    //        if (networkObject.IsOwner)
+    //        {
+    //            Debug.Log("Player " + networkObject.GetComponent<Player>().ID.Value + " ENTRA");
+    //            UIManager.Instance.UpdateAllPlayerPositions(networkObject.GetComponent<Player>().CurrentPosition.Value, playersGameoBjects.Length);
+    //        }
+    //    }
+    //}
 
 
 
