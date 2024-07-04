@@ -29,6 +29,9 @@ public class CarController : NetworkBehaviour
     public NetworkVariable<int> Position = new NetworkVariable<int>(); // Posicion respecto a los demas jugadores
     //public NetworkVariable<float> NetworkSpeed = new NetworkVariable<float>(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
 
+    // Variables para comenzar sincronizados la carrera
+    public NetworkVariable<bool> IsReady = new NetworkVariable<bool>(false);
+    private bool raceStarted = false;
 
     private Rigidbody _rigidbody;
     private float _steerHelper = 0.8f;
@@ -55,12 +58,12 @@ public class CarController : NetworkBehaviour
     public NetworkVariable<float> Speed
     {
         get => _currentSpeed;
-        /*set
+        set
         {
-            if (Math.Abs(_currentSpeed.Value - value) < float.Epsilon) return;
+            if (Math.Abs(_currentSpeed.Value - value.Value) < float.Epsilon) return;
             _currentSpeed = value;
             OnSpeedChangeEvent?.Invoke(_currentSpeed.Value);
-        }*/
+        }
     }
 
     public delegate void OnSpeedChangeDelegate(float newVal);
@@ -82,10 +85,8 @@ public class CarController : NetworkBehaviour
         {
             Debug.LogError("No Rigidbody found in children of Car.");
         }
-        positionText = FindAnyObjectByType<TextImg>().GetComponent<TextMeshProUGUI>();
-        if (positionText == null){
-            Debug.LogError("NO ENCONTRE");
-        }
+
+        StartCoroutine(FindPositionText());
     }
 
 
@@ -103,7 +104,7 @@ public class CarController : NetworkBehaviour
     //        Debug.LogError("NetworkObject no encontrado.");
     //    }
     //}
-    
+
 
     private void OnEnable()
     {
@@ -112,11 +113,11 @@ public class CarController : NetworkBehaviour
         NetworkObject networkObject = GetComponentInParent<NetworkObject>();
         if (networkObject != null)
         {
-           // Debug.Log("NetworkObject encontrado en " + gameObject.name + " con NetworkObjectId: " + networkObject.NetworkObjectId);
+            // Debug.Log("NetworkObject encontrado en " + gameObject.name + " con NetworkObjectId: " + networkObject.NetworkObjectId);
         }
         else
         {
-           // Debug.LogError("NetworkObject no encontrado en el objeto padre de " + gameObject.name);
+            // Debug.LogError("NetworkObject no encontrado en el objeto padre de " + gameObject.name);
         }
 
         if (NetworkManager.Singleton.IsClient)
@@ -125,12 +126,12 @@ public class CarController : NetworkBehaviour
         }
         if (NetworkManager.Singleton.IsServer)
         {
-           // Debug.Log("Este es un servidor.");
+            // Debug.Log("Este es un servidor.");
         }
 
         OnGameStarted();
         StartCoroutine(ReattemptFindComponents());
-        
+
     }
 
     public override void OnNetworkSpawn()
@@ -293,7 +294,7 @@ public class CarController : NetworkBehaviour
         lapTimeController = FindObjectOfType<LapTimeController>();
         if (lapTimeController == null)
         {
-           // Debug.LogError("LapTimeController not found in the scene.");
+            // Debug.LogError("LapTimeController not found in the scene.");
         }
         else
         {
@@ -503,7 +504,7 @@ public class CarController : NetworkBehaviour
     {
         Debug.Log("HAGO!);");
         Position.Value = position;
-        Debug.Log("VELOCIDAD --> "+Position.Value);
+        Debug.Log("VELOCIDAD --> " + Position.Value);
         positionText.text = Position.Value.ToString();
     }
 
@@ -518,6 +519,32 @@ public class CarController : NetworkBehaviour
         }
         Destroy(projectile, projectileLife);
         //Debug.Log("Shooting from the car!");
+    }
+    private IEnumerator FindPositionText()
+    {
+        while (positionText == null)
+        {
+            GameObject textObject = GameObject.FindGameObjectWithTag("posText");
+            if (textObject != null)
+            {
+                positionText = textObject.GetComponent<TextMeshProUGUI>();
+            }
+            // Esperar un frame antes de volver a intentar
+            yield return new WaitForSeconds(1f);
+        }
+    }
+    // Para empezar de forma sincronizada
+    [ServerRpc]
+    public void SetReadyServerRpc()
+    {
+        IsReady.Value = true;
+    }
+
+    [ClientRpc]
+    public void StartRaceClientRpc()
+    {
+        raceStarted = true;
+        // Habilitar controles del coche u otras acciones necesarias para iniciar la carrera
     }
 
     #endregion

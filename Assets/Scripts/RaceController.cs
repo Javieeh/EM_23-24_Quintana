@@ -1,7 +1,9 @@
+using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Networking;
+using System.Linq;
 
 public class RaceController : NetworkBehaviour
 {
@@ -15,6 +17,7 @@ public class RaceController : NetworkBehaviour
     
     private void Start()
     {
+        if(IsServer) StartCoroutine(CheckAllPlayersReady());
         if (_circuitController == null) _circuitController = GetComponent<CircuitController>();
         _players = new GameManager().GetPlayers();
         _debuggingSpheres = new GameObject[GameManager.Instance.numPlayers];
@@ -133,6 +136,30 @@ public class RaceController : NetworkBehaviour
         }
 
         return minArcL;
+    }
+    // FUNCION QUE DA COMIENZO A LA CARRERA DE FORMA SINCRONIZADA
+    private IEnumerator CheckAllPlayersReady(){
+        List<CarController> carControllers = new List<CarController>();
+        foreach(var player in _players){
+            carControllers.Add(player.GetComponentInChildren<CarController>());
+        }
+        while (true)
+        {
+            
+            if (carControllers.All(CarController => CarController.IsReady.Value))
+            {
+                StartRace(carControllers);
+                yield break;
+            }
+            yield return new WaitForSeconds(.5f); // Esperar un segundo antes de volver a comprobar
+        }        
+    }
+    private void StartRace(List<CarController> listCarContr)
+    {
+        foreach (var carContr in listCarContr)
+        {
+            carContr.StartRaceClientRpc();
+        }
     }
     
 }
