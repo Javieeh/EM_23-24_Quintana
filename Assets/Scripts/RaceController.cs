@@ -46,7 +46,9 @@ public class RaceController : NetworkBehaviour
     private void Start()
     {
         /*if (IsServer) StartCoroutine(CheckAllPlayersReady());*/
-
+        foreach (Player player in _players){
+            player.GetComponentInChildren<Rigidbody>().isKinematic = true;
+        }
         if (_circuitController == null) _circuitController = GetComponent<CircuitController>();
 
         _debuggingSpheres = new GameObject[PlayersManager.Instance.PlayersInGame];
