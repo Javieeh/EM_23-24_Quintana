@@ -226,6 +226,7 @@ public class PlayersManager : Singleton<PlayersManager>
                 
             }
             player.GetComponentInChildren<CarController>().enabled = true;
+            player.GetComponentInChildren<InputController>().enabled = true;
             player.GetComponent<Player>().UpdatePlayerAttributesServerRpc();
 
         }
