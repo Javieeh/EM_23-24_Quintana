@@ -25,7 +25,7 @@ public class Player : NetworkBehaviour
 
     // Vida del coche
     public NetworkVariable<int> life = new NetworkVariable<int>(5);
-
+    private ulong lastHitBy;
     private Coroutine cooldownCoroutine;
 
     // Referencias a PlayerName y PlayerColor
@@ -138,7 +138,12 @@ public class Player : NetworkBehaviour
     {
         Debug.Log("Jugador eliminado. Iniciando cooldown de 10 segundos.");
         SetPlayerTag(false);
+
+        // Aumentar el contador de muertes en todos los clientes
         IncrementarMuertesClientRpc();
+        // Incrementar el contador de destrucciones del jugador atacante
+        IncrementarDestruccionesClientRpc(lastHitBy);
+
         yield return new WaitForSeconds(10);
 
         life.Value = 5; // Reiniciamos la vida para simplificar el ejemplo
@@ -149,6 +154,8 @@ public class Player : NetworkBehaviour
         Debug.Log("Cooldown finalizado. Jugador reactivado.");
     }
 
+
+
     private void SetPlayerTag(bool isActive)
     {
         // Asignar o quitar la etiqueta "Player"
@@ -157,21 +164,25 @@ public class Player : NetworkBehaviour
     }
 
     [ServerRpc(RequireOwnership = false)]
-    public void TakeDamageServerRpc(int damage)
+    public void TakeDamageServerRpc(int damage, ulong attackerId)
     {
-        if (!IsServer)
+        if (!IsServer || cooldownCoroutine != null)
             return;
 
         life.Value -= damage;
+        lastHitBy = attackerId;
         Debug.Log($"Vida del jugador después del daño: {life.Value}");
 
         if (life.Value <= 0)
         {
-            // Aquí puedes manejar la destrucción del coche o el reset de vida
-            Debug.Log("Jugador eliminado");
-            life.Value = 0; // Reiniciamos la vida para simplificar el ejemplo
+            if (cooldownCoroutine == null)
+            {
+                cooldownCoroutine = StartCoroutine(CooldownCoroutine());
+            }
         }
     }
+
+
 
     [ClientRpc]
     private void IncrementarMuertesClientRpc()
@@ -183,6 +194,22 @@ public class Player : NetworkBehaviour
         else
         {
             Debug.LogError("UIManager.Instance is null.");
+        }
+    }
+
+    [ClientRpc]
+    private void IncrementarDestruccionesClientRpc(ulong attackerId)
+    {
+        if (NetworkManager.Singleton.LocalClientId == attackerId)
+        {
+            if (CombatGUI.Instance != null)
+            {
+                CombatGUI.Instance.IncrementarDestrucciones();
+            }
+            else
+            {
+                Debug.LogError("UIManager.Instance is null.");
+            }
         }
     }
 }

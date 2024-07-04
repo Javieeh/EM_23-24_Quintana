@@ -8,7 +8,8 @@ public class ProjectilCollision : NetworkBehaviour
     // Start is called before the first frame update
 
     private float timeHit;
-    public int id;
+
+    public ulong shooterId;
 
     void Start()
     {
@@ -32,11 +33,11 @@ public class ProjectilCollision : NetworkBehaviour
             {
                 if (IsServer)
                 {
-                    player.TakeDamageServerRpc(1);
+                    player.TakeDamageServerRpc(1, shooterId);
                 }
                 else
                 {
-                    RequestTakeDamageServerRpc(player.NetworkObjectId, 1);
+                    RequestTakeDamageServerRpc(player.NetworkObjectId, 1, shooterId);
                 }
             }
 
@@ -95,14 +96,14 @@ public class ProjectilCollision : NetworkBehaviour
     }
 
     [ServerRpc(RequireOwnership = false)]
-    void RequestTakeDamageServerRpc(ulong playerNetworkObjectId, int damage)
+    void RequestTakeDamageServerRpc(ulong playerNetworkObjectId, int damage, ulong shooterId)
     {
         if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(playerNetworkObjectId, out var networkObject))
         {
             var player = networkObject.GetComponent<Player>();
             if (player != null)
             {
-                player.TakeDamageServerRpc(damage);
+                player.TakeDamageServerRpc(damage, shooterId);
             }
         }
     }

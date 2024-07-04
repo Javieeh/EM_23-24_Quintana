@@ -7,8 +7,10 @@ public class CombatGUI : MonoBehaviour
 {
     public static CombatGUI Instance;
     public TextMeshProUGUI muertesText;
+    public TextMeshProUGUI destruccionesText;
 
     private int muertes = 0;
+    private int destrucciones = 0;
 
     private void Awake()
     {
@@ -27,6 +29,7 @@ public class CombatGUI : MonoBehaviour
     private void Start()
     {
         UpdateMuertesText();
+        UpdateDestruccionesText();
     }
 
     public void IncrementarMuertes()
@@ -35,15 +38,33 @@ public class CombatGUI : MonoBehaviour
         UpdateMuertesText();
     }
 
+    public void IncrementarDestrucciones()
+    {
+        destrucciones++;
+        UpdateDestruccionesText();
+    }
+
     private void UpdateMuertesText()
     {
         if (muertesText != null)
         {
-            muertesText.text = "Muertes: " + muertes.ToString();
+            muertesText.text = muertes.ToString();
         }
         else
         {
             Debug.LogError("MuertesText reference is not set in UIManager.");
+        }
+    }
+
+    private void UpdateDestruccionesText()
+    {
+        if (destruccionesText != null)
+        {
+            destruccionesText.text = destrucciones.ToString();
+        }
+        else
+        {
+            Debug.LogError("DestruccionesText reference is not set in UIManager.");
         }
     }
 }
