@@ -16,11 +16,29 @@ public class PlayerName : NetworkBehaviour
         {
             playerName.OnValueChanged += OnNameChanged;
         }
-
-        if (IsOwner)
+        UpdateName();
+    }
+    private void UpdateName()
+    {
+        if (nameText != null)
         {
-            SetName("Player" + NetworkManager.Singleton.LocalClientId); // Establece un nombre inicial
 
+            nameText.text = playerName.Value.ToString();
+        }
+    }
+    public void SendCurrentNameToClient(ulong clientId)
+    {
+
+        SendCurrentNameClientRpc(clientId, playerName.Value);
+    }
+    [ClientRpc]
+    public void SendCurrentNameClientRpc(ulong clientId, NetworkString currentName)
+    {
+
+        if (NetworkManager.Singleton.LocalClientId == clientId)
+        {
+            playerName.Value = currentName;
+            UpdateName();
         }
     }
 
@@ -34,10 +52,7 @@ public class PlayerName : NetworkBehaviour
 
     private void OnNameChanged(NetworkString oldName, NetworkString newName)
     {
-        if (nameText != null)
-        {
-            nameText.text = newName.ToString();
-        }
+        UpdateName();
     }
 
     [ServerRpc]
