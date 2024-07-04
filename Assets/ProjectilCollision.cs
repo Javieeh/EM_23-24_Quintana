@@ -7,7 +7,6 @@ public class ProjectilCollision : NetworkBehaviour
 {
     // Start is called before the first frame update
 
-    public Material hitMaterial;
     private float timeHit;
     public int id;
 
@@ -27,6 +26,19 @@ public class ProjectilCollision : NetworkBehaviour
         if (other.CompareTag("Player"))
         {
             Debug.Log("Dado");
+
+            var player = other.GetComponentInParent<Player>();
+            if (player != null)
+            {
+                if (IsServer)
+                {
+                    player.TakeDamageServerRpc(1);
+                }
+                else
+                {
+                    RequestTakeDamageServerRpc(player.NetworkObjectId, 1);
+                }
+            }
 
             if (IsServer)
             {
@@ -66,21 +78,32 @@ public class ProjectilCollision : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     void RequestDespawnServerRpc()
     {
+        DespawnBullet();
+    }
+
+    void DespawnBullet()
+    {
         var networkObject = GetComponent<NetworkObject>();
         if (networkObject != null && networkObject.IsSpawned)
         {
             networkObject.Despawn();
         }
+        else
+        {
+            Debug.LogWarning("Trying to despawn a bullet that is not spawned");
+        }
     }
 
-    private System.Collections.IEnumerator ResetMaterial(Material originalMaterial, Renderer renderer, int life, float timeHit)
+    [ServerRpc(RequireOwnership = false)]
+    void RequestTakeDamageServerRpc(ulong playerNetworkObjectId, int damage)
     {
-        yield return new WaitForSeconds(timeHit);
-
-        if (life >= 1) //Excepcion para que no salte error durante la ejecucion debido a que el jugador ya haya sido eliminado
+        if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(playerNetworkObjectId, out var networkObject))
         {
-            // Restablecer el material original
-            renderer.material = originalMaterial;
+            var player = networkObject.GetComponent<Player>();
+            if (player != null)
+            {
+                player.TakeDamageServerRpc(damage);
+            }
         }
     }
 }

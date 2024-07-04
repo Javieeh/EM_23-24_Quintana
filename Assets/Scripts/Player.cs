@@ -1,12 +1,14 @@
 using System.Collections;
 using System.ComponentModel;
 using System.Globalization;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.Serialization;
 using UnityEngine.UIElements;
+using Unity.Netcode;
 
-public class Player : MonoBehaviour
+public class Player : NetworkBehaviour
 {
     // Player Info
     public string Name { get; set; }
@@ -23,15 +25,13 @@ public class Player : MonoBehaviour
     public int points;
     public bool isDie;
 
-    //Materiales
-    private Renderer originRender;
-    private Material originMaterial;
-
     //Id
     public int id;
 
     //vida del coche
-    public int life;
+    public NetworkVariable<int> life = new NetworkVariable<int>(5);
+    private Coroutine cooldownCoroutine;
+
 
     //public override void OnNetworkSpawn()
     //{
@@ -57,51 +57,46 @@ public class Player : MonoBehaviour
     private void Start()
     {
         //GameManager.Instance.currentRace.AddPlayer(this);
-        life = 5;
         numeroMuertes = 0;
         points = 0;
         isDie = false;
-        id = 0;
-
-        originRender = GetComponentInChildren<Renderer>();
-        originMaterial = originRender.material;
     }
 
-
-    private void Update()
+    private IEnumerator CooldownCoroutine()
     {
-        if (life <= 0 && isDie == false) // en caso de quedarse sin vida, destruimos
+        Debug.Log("Jugador eliminado. Iniciando cooldown de 10 segundos.");
+        SetPlayerTag(false);
+
+        yield return new WaitForSeconds(10);
+
+        life.Value = 5; // Reiniciamos la vida para simplificar el ejemplo
+        SetPlayerTag(true);
+        cooldownCoroutine = null;
+
+        Debug.Log("Cooldown finalizado. Jugador reactivado.");
+    }
+
+    private void SetPlayerTag(bool isActive)
+    {
+        // Asignar o quitar la etiqueta "Player"
+        var playerTag = isActive ? "Player" : "Untagged";
+        transform.GetChild(0).tag = playerTag;
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void TakeDamageServerRpc(int damage)
+    {
+        if (!IsServer)
+            return;
+
+        life.Value -= damage;
+        Debug.Log($"Vida del jugador después del daño: {life.Value}");
+
+        if (life.Value <= 0)
         {
-            Debug.Log("jugador eliminado");
-            numeroMuertes++;
-            isDieDie();
+            // Aquí puedes manejar la destrucción del coche o el reset de vida
+            Debug.Log("Jugador eliminado");
+            life.Value = 5; // Reiniciamos la vida para simplificar el ejemplo
         }
     }
-
-    IEnumerator CountDown()
-    {
-        Debug.Log("cooldown...");
-        this.life = 5;
-        isDie = false;
-        yield return new WaitForSeconds(5);
-        //volvermos a establecer el tag
-        
-        this.transform.GetChild(0).transform.tag = "Player";
-    }
-
-
-    public void isDieDie()
-    {
-        isDie = true;
-
-        //Quitamos tag para que no se pueda disparar mas
-        this.transform.GetChild(0).transform.tag = "Untagged";
-
-        //reajustamos material
-        originRender.material = originMaterial;
-
-        Debug.Log("Empezando cooldown");
-        StartCoroutine(CountDown());
-    }
-
 }

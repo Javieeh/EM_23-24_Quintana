@@ -550,10 +550,21 @@ public class CarController : NetworkBehaviour
             networkObject.Spawn();
         }
 
-        Destroy(projectile, projectileLife);
-        
+        //Destroy(projectile, projectileLife);
+
+        StartCoroutine(DestroyBulletAfterTime(projectile, 2.0f));
     }
 
+    private IEnumerator DestroyBulletAfterTime(GameObject bullet, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+
+        var networkObject = bullet.GetComponent<NetworkObject>();
+        if (networkObject != null && networkObject.IsSpawned)
+        {
+            networkObject.Despawn();
+        }
+    }
     #endregion
 }
 #endregion
