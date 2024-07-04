@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Player : NetworkBehaviour
 {
+
     // Player Info
     public NetworkVariable<NetworkString> Name = new NetworkVariable<NetworkString>();
     public NetworkVariable<int> ID = new NetworkVariable<int>();
@@ -11,7 +12,7 @@ public class Player : NetworkBehaviour
     // Race Info
     public GameObject car;
     public NetworkVariable<Color> CarColor = new NetworkVariable<Color>();
-    public NetworkVariable<int> CurrentPosition = new NetworkVariable<int>();
+    public NetworkVariable<int> CurrentPosition = new NetworkVariable<int>(default, readPerm: NetworkVariableReadPermission.Everyone, writePerm: NetworkVariableWritePermission.Server);
     public NetworkVariable<int> CurrentLap = new NetworkVariable<int>();
 
     // Otros atributos
@@ -25,7 +26,7 @@ public class Player : NetworkBehaviour
 
     // Vida del coche
     public NetworkVariable<int> life = new NetworkVariable<int>(5);
-
+    private ulong lastHitBy;
     private Coroutine cooldownCoroutine;
 
     // Referencias a PlayerName y PlayerColor
@@ -104,6 +105,17 @@ public class Player : NetworkBehaviour
                 cooldownCoroutine = StartCoroutine(CooldownCoroutine());
             }
         }
+        UpdatePlayerPositionsClientRpc();
+    }
+    [ClientRpc]
+    private void UpdatePlayerPositionsClientRpc()
+    {
+        if (IsOwner)
+        {
+            Debug.Log("Player " + ID.Value + " ENTRA");
+            UIManager.Instance.UpdateAllPlayerPositions(CurrentPosition.Value, PlayersManager.Instance.PlayersInGame);
+        }
+
     }
 
     [ServerRpc]
@@ -139,6 +151,20 @@ public class Player : NetworkBehaviour
         Debug.Log("Jugador eliminado. Iniciando cooldown de 10 segundos.");
         SetPlayerTag(false);
 
+        // Aumentar el contador de muertes en todos los clientes
+        IncrementarMuertesClientRpc();
+        // Incrementar el contador de destrucciones del jugador atacante
+        IncrementarDestruccionesClientRpc(lastHitBy);
+
+        int cooldownTime = 10;
+        for (int i = cooldownTime; i > 0; i--)
+        {
+            ShowCooldownTextClientRpc(i);
+            yield return new WaitForSeconds(1);
+        }
+
+        HideCooldownTextClientRpc();
+
         yield return new WaitForSeconds(10);
 
         life.Value = 5; // Reiniciamos la vida para simplificar el ejemplo
@@ -149,6 +175,8 @@ public class Player : NetworkBehaviour
         Debug.Log("Cooldown finalizado. Jugador reactivado.");
     }
 
+
+
     private void SetPlayerTag(bool isActive)
     {
         // Asignar o quitar la etiqueta "Player"
@@ -157,19 +185,78 @@ public class Player : NetworkBehaviour
     }
 
     [ServerRpc(RequireOwnership = false)]
-    public void TakeDamageServerRpc(int damage)
+    public void TakeDamageServerRpc(int damage, ulong attackerId)
     {
-        if (!IsServer)
+        if (!IsServer || cooldownCoroutine != null)
             return;
 
         life.Value -= damage;
+        lastHitBy = attackerId;
         Debug.Log($"Vida del jugador después del daño: {life.Value}");
 
         if (life.Value <= 0)
         {
-            // Aquí puedes manejar la destrucción del coche o el reset de vida
-            Debug.Log("Jugador eliminado");
-            life.Value = 0; // Reiniciamos la vida para simplificar el ejemplo
+            if (cooldownCoroutine == null)
+            {
+                cooldownCoroutine = StartCoroutine(CooldownCoroutine());
+            }
+        }
+    }
+
+
+
+    [ClientRpc]
+    private void IncrementarMuertesClientRpc()
+    {
+        if (IsOwner)
+        {
+            CombatGUI.Instance.IncrementarMuertes();
+        }
+        else
+        {
+            Debug.LogError("UIManager.Instance is null.");
+        }
+    }
+
+    [ClientRpc]
+    private void IncrementarDestruccionesClientRpc(ulong attackerId)
+    {
+        if (NetworkManager.Singleton.LocalClientId == attackerId)
+        {
+            if (CombatGUI.Instance != null)
+            {
+                CombatGUI.Instance.IncrementarDestrucciones();
+            }
+            else
+            {
+                Debug.LogError("UIManager.Instance is null.");
+            }
+        }
+    }
+
+    [ClientRpc]
+    private void ShowCooldownTextClientRpc(int seconds)
+    {
+        if (IsOwner)
+        {
+            CombatGUI.Instance.ShowCooldownText(seconds);
+        }
+        else
+        {
+            Debug.LogError("UIManager.Instance is null.");
+        }
+    }
+
+    [ClientRpc]
+    private void HideCooldownTextClientRpc()
+    {
+        if (IsOwner)
+        {
+            CombatGUI.Instance.HideCooldownText();
+        }
+        else
+        {
+            Debug.LogError("UIManager.Instance is null.");
         }
     }
 }

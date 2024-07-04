@@ -5,34 +5,88 @@ using UnityEngine;
 
 public class CombatGUI : MonoBehaviour
 {
-    private TextMeshProUGUI numMuertes;
-    private TextMeshProUGUI numDestruidos;
+    public static CombatGUI Instance;
+    public TextMeshProUGUI muertesText;
+    public TextMeshProUGUI destruccionesText;
+    public TextMeshProUGUI cooldownText; // Añadir referencia al texto de cooldown
 
-    private int numMuertesTotal;
-    private int numDestruidosTotal;
+    private int muertes = 0;
+    private int destrucciones = 0;
 
-    public Player player;
-
-
-    void Start()
+    private void Awake()
     {
-        numMuertes = this.transform.GetChild(1).GetComponent<TextMeshProUGUI>();
-        numDestruidos = this.transform.GetChild(3).GetComponent<TextMeshProUGUI>();
-
-        /*Player[] carControllers = FindObjectsOfType<Player>();
-        foreach (Player carController in carControllers)
+        // Asegurar que sólo haya una instancia de UIManager
+        if (Instance == null)
         {
-            if (carController.gameObject.GetComponent<NetworkObject>().IsOwner)
-            {
-                ownPlayer = carController;
-            }
-        }*/
+            Instance = this;
+            DontDestroyOnLoad(gameObject); // Opcional, si deseas que el UIManager persista entre escenas
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Start()
     {
-        //numDestruidos.text = player.points.ToString();
-        //numMuertes.text = player.numeroMuertes.ToString();
+        UpdateMuertesText();
+        UpdateDestruccionesText();
+        if (cooldownText != null)
+        {
+            cooldownText.enabled = false; // Asegurarse de que el texto esté apagado inicialmente
+        }
+    }
+
+    public void IncrementarMuertes()
+    {
+        muertes++;
+        UpdateMuertesText();
+    }
+
+    public void IncrementarDestrucciones()
+    {
+        destrucciones++;
+        UpdateDestruccionesText();
+    }
+
+    private void UpdateMuertesText()
+    {
+        if (muertesText != null)
+        {
+            muertesText.text = muertes.ToString();
+        }
+        else
+        {
+            Debug.LogError("MuertesText reference is not set in UIManager.");
+        }
+    }
+
+    private void UpdateDestruccionesText()
+    {
+        if (destruccionesText != null)
+        {
+            destruccionesText.text = destrucciones.ToString();
+        }
+        else
+        {
+            Debug.LogError("DestruccionesText reference is not set in UIManager.");
+        }
+    }
+
+    public void ShowCooldownText(int seconds)
+    {
+        if (cooldownText != null)
+        {
+            cooldownText.enabled = true;
+            cooldownText.text = $"Respawning in {seconds} seconds...";
+        }
+    }
+
+    public void HideCooldownText()
+    {
+        if (cooldownText != null)
+        {
+            cooldownText.enabled = false;
+        }
     }
 }

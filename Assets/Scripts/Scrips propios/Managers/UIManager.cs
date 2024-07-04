@@ -59,14 +59,25 @@ public class UIManager : Singleton<UIManager>
         playersInGameText.text = $"Players in game: {PlayersManager.Instance.PlayersInGame}";
     }
 
-    public void InitPositionText(int playerIndex, int totalPlayers, TextMeshProUGUI positionText)
+    public void InitPositionText(int playerIndex, int totalPlayers)
     {
+        TextMeshProUGUI positionText = GameObject.FindGameObjectWithTag("PositionText").GetComponent<TextMeshProUGUI>();
         positions = positionText;
         if (playerIndex <= totalPlayers)
         {
-            //positions.text = $"{playerIndex + 1}/{totalPlayers}";
+            positions.text = $"{playerIndex + 1}/{totalPlayers}";
         }
     }
+
+    public void UpdateAllPlayerPositions(int playerPosition, int totalPlayers)
+    {
+        TextMeshProUGUI positionText = GameObject.FindGameObjectWithTag("PositionText").GetComponent<TextMeshProUGUI>();
+
+        positionText.text = $"{playerPosition}/{totalPlayers}";
+        Debug.Log(positionText.text);
+        
+    }
+
     // Start is called before the first frame update
     void Start()
     {

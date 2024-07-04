@@ -234,6 +234,7 @@ public class PlayersManager : Singleton<PlayersManager>
                 
             }
             player.GetComponentInChildren<CarController>().enabled = true;
+            player.GetComponentInChildren<InputController>().enabled = true;
             player.GetComponent<Player>().UpdatePlayerAttributesServerRpc();
 
         }
@@ -276,7 +277,7 @@ public class PlayersManager : Singleton<PlayersManager>
 
             if (networkObject.IsOwner)
             {
-                UIManager.Instance.InitPositionText((int) networkObject.OwnerClientId, PlayersInGame, position);
+                UIManager.Instance.InitPositionText((int)networkObject.OwnerClientId, PlayersInGame);
             }
         }
     }
