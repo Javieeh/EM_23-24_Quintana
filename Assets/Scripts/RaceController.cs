@@ -30,11 +30,13 @@ public class RaceController : NetworkBehaviour
         {
             Destroy(gameObject);
         }
-        if(IsServer)GetComponent<NetworkObject>().Spawn();
+        
     }
 
     private void Start()
     {
+        if(IsHost) this.gameObject.GetComponent<NetworkObject>().Spawn();
+
         if (IsServer) StartCoroutine(CheckAllPlayersReady());
 
         if (_circuitController == null) _circuitController = GetComponent<CircuitController>();
@@ -44,6 +46,7 @@ public class RaceController : NetworkBehaviour
         {
             _debuggingSpheres[i] = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             _debuggingSpheres[i].GetComponent<SphereCollider>().enabled = false;
+            _debuggingSpheres[i].GetComponent<MeshRenderer>().enabled = false;
         }
 
         // Obtener todos los jugadores al inicio
@@ -56,6 +59,8 @@ public class RaceController : NetworkBehaviour
                 AddPlayer(player);
             }
         }
+
+        
     }
 
     private void Update()
@@ -109,11 +114,9 @@ public class RaceController : NetworkBehaviour
 
     public void UpdateRaceProgress()
     {
-
         if (_players.Count == 0)
             return;
 
-        // Update car arc-lengths
         float[] arcLengths = new float[_players.Count];
 
         for (int i = 0; i < _players.Count; ++i)
@@ -133,16 +136,34 @@ public class RaceController : NetworkBehaviour
             }
         }
 
-        _players.Sort(new PlayerInfoComparer(arcLengths)); // Se ordenan los jugadores
-
-        string myRaceOrder = "";
-        foreach (var player in _players)
+        List<KeyValuePair<int, float>> sortedPlayers = new List<KeyValuePair<int, float>>();
+        for (int i = 0; i < _players.Count; i++)
         {
-            myRaceOrder += player.Name + " ";
+            sortedPlayers.Add(new KeyValuePair<int, float>(i, arcLengths[i]));
         }
 
-        Debug.Log("Race order: " + myRaceOrder);
+        sortedPlayers.Sort((x, y) => y.Value.CompareTo(x.Value));
+
+        for (int i = 0; i < sortedPlayers.Count; i++)
+        {
+            var playerIndex = sortedPlayers[i].Key;
+            _players[playerIndex].CurrentPosition.Value = i + 1; // Posición basada en 1
+        }
+
+        // Notifica a todos los clientes para actualizar la interfaz
+        UpdatePlayerPositionsClientRpc();
     }
+
+    [ClientRpc]
+    private void UpdatePlayerPositionsClientRpc()
+    {
+        foreach (var player in _players)
+        {
+            
+            if(player.GetComponent<NetworkObject>().IsOwner)UIManager.Instance.UpdateAllPlayerPositions(player.CurrentPosition.Value, _players.Count);
+        }
+    }
+
 
     float ComputeCarArcLength(int id)
     {
@@ -195,5 +216,4 @@ public class RaceController : NetworkBehaviour
             carContr.StartRaceClientRpc();
         }
     }
-
 }

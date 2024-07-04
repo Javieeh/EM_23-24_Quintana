@@ -11,7 +11,7 @@ public class Player : NetworkBehaviour
     // Race Info
     public GameObject car;
     public NetworkVariable<Color> CarColor = new NetworkVariable<Color>();
-    public NetworkVariable<int> CurrentPosition = new NetworkVariable<int>();
+    public NetworkVariable<int> CurrentPosition = new NetworkVariable<int>(default, readPerm: NetworkVariableReadPermission.Everyone, writePerm: NetworkVariableWritePermission.Server);
     public NetworkVariable<int> CurrentLap = new NetworkVariable<int>();
 
     // Otros atributos
