@@ -11,7 +11,7 @@ public class CountdownText : MonoBehaviour
 
     private void Start()
     {
-        startUI = GetComponentInParent
+        startUI = GetComponentInParent<GameObject>();
         iteration = 5;
         textCD = GetComponent<TextMeshProUGUI>();
         textCD.text = iteration.ToString();
@@ -19,10 +19,11 @@ public class CountdownText : MonoBehaviour
     public bool TryDecrement()
     {
         if (iteration == 1){
-            textCD.text = "GO!";
+            startUI.SetActive(false);
             return false;
         }
         iteration--;
         textCD.text = iteration.ToString();
+        return true;
     }
 }

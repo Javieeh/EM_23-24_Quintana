@@ -11,6 +11,7 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance { get; private set; }
 
     public List<Player> players = new List<Player>();
+    private CountdownText countdownText;
     
 
 
@@ -27,6 +28,7 @@ public class GameManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
+        countdownText = FindAnyObjectByType<CountdownText>();
         StartCoroutine(StartCountDown());
     }
 
@@ -40,10 +42,14 @@ public class GameManager : MonoBehaviour
         return players;
     }
     private IEnumerator StartCountDown(){
+        bool stop = true;
         // Hacemos estaticos a los jugadores
         foreach (Player player in players) player.GetComponentInChildren<Rigidbody>().isKinematic = true;
-        
-        yield return new WaitForSeconds(1);
-
+        yield return new WaitForSeconds(1); // Empieza cuenta atras
+        while(stop){
+            stop = countdownText.TryDecrement(); // Devuelvce true si decrementamos el contador, pero todavia no salen los coches
+            // Y devuelve true si pueden salir
+        }
+        foreach (Player player in players) player.GetComponentInChildren<Rigidbody>().isKinematic = false;
     }
 }
