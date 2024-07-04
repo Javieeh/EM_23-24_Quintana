@@ -22,6 +22,17 @@ public class PlayerColor : NetworkBehaviour
         {
             ChangeColor(); // Cambia el color cuando se instancia el jugador
         }
+        UpdateColor();
+    }
+
+    private void UpdateColor()
+    {
+        if (bodyRenderer != null && bodyRenderer.materials.Length > 1)
+        {
+            Material[] materials = bodyRenderer.materials;
+            materials[1].color = playerColor.Value;
+            bodyRenderer.materials = materials;
+        }
     }
 
     private void OnDestroy()
