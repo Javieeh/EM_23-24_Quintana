@@ -156,10 +156,10 @@ public class CarController : NetworkBehaviour
 
     public void Update()
     {
-        Speed.Value = _rigidbody.GetComponent<Rigidbody>().velocity.magnitude;
 
         if (IsOwner && IsSpawned && NetworkManager.Singleton.IsClient)
         {
+            UpdateSpeedServerRpc();
             float steeringInput = Mathf.Clamp(Input.GetAxis("Horizontal"), -1, 1);
             float accelerationInput = Mathf.Clamp(Input.GetAxis("Vertical"), -1, 1);
             float brakeInput = Input.GetKey(KeyCode.Space) ? 1 : 0;
@@ -170,6 +170,11 @@ public class CarController : NetworkBehaviour
         {
             //Debug.Log("No es propietario o no está spawneado o no es cliente: " + NetworkManager.LocalClientId);
         }
+    }
+    [ServerRpc]
+    private void UpdateSpeedServerRpc()
+    {
+        Speed.Value = _rigidbody.GetComponent<Rigidbody>().velocity.magnitude;
     }
 
     [ServerRpc(RequireOwnership = false)]

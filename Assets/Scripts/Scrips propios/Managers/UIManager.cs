@@ -73,7 +73,8 @@ public class UIManager : Singleton<UIManager>
     {
         TextMeshProUGUI positionText = GameObject.FindGameObjectWithTag("PositionText").GetComponent<TextMeshProUGUI>();
 
-            positionText.text = $"{playerPosition}/{totalPlayers}";
+        positionText.text = $"{playerPosition}/{totalPlayers}";
+        Debug.Log(positionText.text);
         
     }
 

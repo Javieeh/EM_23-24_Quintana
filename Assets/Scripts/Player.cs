@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Player : NetworkBehaviour
 {
+
     // Player Info
     public NetworkVariable<NetworkString> Name = new NetworkVariable<NetworkString>();
     public NetworkVariable<int> ID = new NetworkVariable<int>();

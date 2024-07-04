@@ -35,7 +35,7 @@ public class RaceController : NetworkBehaviour
 
     private void Start()
     {
-        if(IsHost) this.gameObject.GetComponent<NetworkObject>().Spawn();
+        this.gameObject.GetComponent<NetworkObject>().Spawn();
 
         if (IsServer) StartCoroutine(CheckAllPlayersReady());
 
@@ -159,10 +159,12 @@ public class RaceController : NetworkBehaviour
     {
         foreach (var player in _players)
         {
+            Debug.Log("Player "+ player.ID.Value + " ENTRA");
+            if(player.IsOwner) UIManager.Instance.UpdateAllPlayerPositions(player.CurrentPosition.Value, _players.Count);
             
-            if(player.GetComponent<NetworkObject>().IsOwner)UIManager.Instance.UpdateAllPlayerPositions(player.CurrentPosition.Value, _players.Count);
         }
     }
+
 
 
     float ComputeCarArcLength(int id)

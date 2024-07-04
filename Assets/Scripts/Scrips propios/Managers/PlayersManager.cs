@@ -308,18 +308,4 @@ public class PlayersManager : Singleton<PlayersManager>
         Debug.Log("Devuelve nulo");
         return null;
     }
-
-    public void UpdatePlayerPosition(List<Player> players)
-    {
-
-        foreach (var player in players)
-        {
-            NetworkObject networkObject = player.GetComponent<NetworkObject>();
-
-            if (networkObject.IsOwner)
-            {
-                UIManager.Instance.UpdateAllPlayerPositions(player.CurrentPosition.Value, players.Count);
-            }
-        }
-    }
 }
