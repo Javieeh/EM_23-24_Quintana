@@ -275,7 +275,7 @@ public class CarController : NetworkBehaviour
         }
         else
         {
-            Debug.Log("CheckpointManager found.");
+            //Debug.Log("CheckpointManager found.");
         }
 
         lapTimeController = FindObjectOfType<LapTimeController>();
@@ -285,7 +285,7 @@ public class CarController : NetworkBehaviour
         }
         else
         {
-            Debug.Log("LapTimeController found.");
+            //Debug.Log("LapTimeController found.");
         }
     }
 
