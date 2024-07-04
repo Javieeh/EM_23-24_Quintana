@@ -1,9 +1,29 @@
-using System.Collections.Generic;
 using UnityEngine;
+using Unity.Netcode;
 
-public class CheckpointManager : MonoBehaviour
+public class CheckpointManager : NetworkBehaviour
 {
-    public List<Checkpoint> checkpoints; // Lista de checkpoints en el orden correcto
+    public NetworkVariable<int> CurrentCheckpoint = new NetworkVariable<int>(0);
+    public NetworkVariable<int> LapsCompleted = new NetworkVariable<int>(0);
+    private int TotalCheckpoints;
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Checkpoint")) // Si pasa por un checkpoint...
+        {
+            Checkpoint checkpoint = other.GetComponent<Checkpoint>();
+            if (checkpoint != null) // Si es un checkpoint valido
+            {   // Si el checkpoint es el inicial (0) y el valor actual del checkpoint es el ultimo. Habremos completado una vuelta
+                if (checkpoint.CheckpointNumber == 0 && CurrentCheckpoint.Value == TotalCheckpoints) 
+                {   
+                    LapsCompleted.Value += 1;
+                } // Si no, simplemente guardamos que hemos pasado por ese checkpoint
+                CurrentCheckpoint.Value = checkpoint.CheckpointNumber;
+            }
+        }
+    }
+
+    #region cod_antiguo
+    /*public List<Checkpoint> checkpoints; // Lista de checkpoints en el orden correcto
     private int currentCheckpointIndex = 0;
     private int currentLap = 0;
     public int totalLaps = 3; // N�mero total de vueltas
@@ -59,5 +79,6 @@ public class CheckpointManager : MonoBehaviour
         {
             Debug.Log("You need to pass all checkpoints before finishing the lap.");
         }
-    }
+    }*/
+    #endregion
 }

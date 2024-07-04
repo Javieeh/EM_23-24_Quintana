@@ -2,6 +2,5 @@ using UnityEngine;
 
 public class Checkpoint : MonoBehaviour
 {
-    //Id que tendr· cada checkpoint para recorrerlos de manera ordenada
-    public int checkpointID;
+    public int CheckpointNumber; // El n√∫mero de este checkpoint en el circuito;
 }

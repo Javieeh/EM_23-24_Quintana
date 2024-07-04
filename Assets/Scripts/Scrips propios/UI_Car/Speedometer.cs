@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using Unity.Netcode;
+using System.Collections;
 
 public class Speedometer : MonoBehaviour
 {
@@ -18,18 +19,24 @@ public class Speedometer : MonoBehaviour
 
     private float speed = 0.0f;
 
-    private void Start() 
+    private void Start()
     {
-       
+        StartCoroutine(WaitToLink());
     }
     private void Update()
-    {    
-        //speed = _carController._currentSpeed * 3.6f; // Multiplicamos por 3.6 para obtener la velocidad en Km/h
+    {
+        speed = _carController._currentSpeed.Value * 3.6f; // Multiplicamos por 3.6 para obtener la velocidad en Km/h
 
-        //if (speedLabel != null)
-        //    speedLabel.text = ((int)speed) + " km/h";
-        //if (arrow != null)
-        //    arrow.localEulerAngles =
-        //        new Vector3(0, 0, Mathf.Lerp(minSpeedArrowAngle, maxSpeedArrowAngle, speed / maxSpeed));
+        if (speedLabel != null)
+            speedLabel.text = ((int)speed) + " km/h";
+        if (arrow != null)
+            arrow.localEulerAngles =
+                new Vector3(0, 0, Mathf.Lerp(minSpeedArrowAngle, maxSpeedArrowAngle, speed / maxSpeed));
+    }
+    private IEnumerator WaitToLink()
+    {
+        yield return new WaitForSeconds(1);
+        _target = PlayersManager.Instance.GetRB();
+        _carController = _target.transform.GetComponent<CarController>();
     }
 }
